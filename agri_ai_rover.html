@@ -1,0 +1,1552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AGRI AI ROVER — Crop & Seed Intelligence System</title>
+    <meta name="description" content="AI-Powered Agriculture Monitoring, Vision Crop/Seed Identification & Smart Environmental Decision System.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* ==========================================================================
+           AGRI AI ROVER - Complete Embedded CSS Design System
+           ========================================================================== */
+
+        :root {
+            --primary-dark: #1b4332;
+            --primary-medium: #2d6a4f;
+            --primary-accent: #40916c;
+            --primary-light: #52b788;
+            --primary-soft: #d8f3dc;
+            --bg-main: #f8faf9;
+            --card-bg: #ffffff;
+            
+            --status-success-bg: #dcfce7;
+            --status-success-text: #15803d;
+            --status-warning-bg: #fef3c7;
+            --status-warning-text: #b45309;
+            --status-danger-bg: #fee2e2;
+            --status-danger-text: #b91c1c;
+            --status-neutral-bg: #f3f4f6;
+            --status-neutral-text: #4b5563;
+
+            --text-heading: #0f291e;
+            --text-body: #374151;
+            --text-muted: #6b7280;
+            --border-color: #e5e7eb;
+
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 16px;
+            --shadow-card: 0 4px 12px rgba(27, 67, 50, 0.05);
+            --shadow-hover: 0 6px 18px rgba(27, 67, 50, 0.1);
+            --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-body);
+            line-height: 1.5;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        .app-header {
+            background-color: var(--primary-dark);
+            color: #ffffff;
+            padding: 1.25rem 2rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-container {
+            max-width: 1280px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .brand-icon {
+            font-size: 2rem;
+            background: rgba(255, 255, 255, 0.1);
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--radius-md);
+        }
+
+        .brand-text h1 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.1rem;
+        }
+
+        .brand-text .subtitle {
+            font-size: 0.85rem;
+            color: var(--primary-soft);
+            font-weight: 400;
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .telemetry-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(255, 255, 255, 0.12);
+            padding: 0.4rem 0.85rem;
+            border-radius: 50px;
+            font-size: 0.82rem;
+            font-weight: 500;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #22c55e;
+            box-shadow: 0 0 8px #22c55e;
+        }
+
+        .status-dot.dot-warning {
+            background-color: #f59e0b;
+            box-shadow: 0 0 8px #f59e0b;
+        }
+
+        .status-dot.dot-error {
+            background-color: #ef4444;
+            box-shadow: 0 0 8px #ef4444;
+        }
+
+        .btn-config {
+            background: rgba(255, 255, 255, 0.15);
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            padding: 0.4rem 0.85rem;
+            border-radius: 50px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-config:hover {
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        /* Settings Modal / Panel */
+        .settings-panel {
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow-card);
+        }
+
+        .settings-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .settings-field {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .settings-field label {
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .settings-field input {
+            padding: 0.5rem 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            font-size: 0.9rem;
+            width: 100%;
+        }
+
+        .status-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 0.75rem;
+            background: #f8faf9;
+            padding: 0.85rem;
+            border-radius: var(--radius-sm);
+            margin: 0.75rem 0;
+            font-size: 0.82rem;
+        }
+
+        .status-info-item span {
+            display: block;
+            color: var(--text-muted);
+            font-size: 0.75rem;
+        }
+
+        .status-info-item strong {
+            color: var(--text-heading);
+            font-weight: 600;
+        }
+
+        /* Main Layout */
+        .main-container {
+            max-width: 1280px;
+            width: 100%;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+            flex: 1;
+        }
+
+        .grid-layout {
+            display: grid;
+            grid-template-columns: 400px 1fr;
+            gap: 1.75rem;
+            align-items: start;
+        }
+
+        @media (max-width: 992px) {
+            .grid-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Cards */
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-card);
+            transition: var(--transition);
+            margin-bottom: 1.25rem;
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-hover);
+        }
+
+        .card-title {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border-bottom: 2px solid var(--primary-soft);
+            padding-bottom: 0.5rem;
+        }
+
+        .card-desc {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            margin-bottom: 1.25rem;
+        }
+
+        .step-num {
+            background: var(--primary-medium);
+            color: #ffffff;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+        }
+
+        /* Upload Area */
+        .upload-area {
+            border: 2px dashed var(--primary-light);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            text-align: center;
+            background: #f4fbf7;
+            position: relative;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .upload-area:hover, .upload-area.drag-over {
+            border-color: var(--primary-dark);
+            background: var(--primary-soft);
+        }
+
+        .file-input {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .upload-icon {
+            font-size: 2.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .upload-prompt {
+            font-size: 0.95rem;
+            color: var(--text-heading);
+            margin-bottom: 0.25rem;
+        }
+
+        .upload-hint {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
+
+        /* Image Preview */
+        .preview-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .preview-img {
+            max-width: 100%;
+            max-height: 220px;
+            object-fit: contain;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+        }
+
+        .file-details {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            font-size: 0.82rem;
+        }
+
+        .file-name {
+            font-weight: 600;
+            color: var(--text-heading);
+            max-width: 180px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .file-size {
+            color: var(--text-muted);
+        }
+
+        .btn-remove {
+            background: none;
+            border: 1px solid var(--status-danger-text);
+            color: var(--status-danger-text);
+            padding: 0.25rem 0.65rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.78rem;
+            cursor: pointer;
+            z-index: 10;
+            transition: var(--transition);
+        }
+
+        .btn-remove:hover {
+            background: var(--status-danger-bg);
+        }
+
+        /* Sensor Controls */
+        .sensor-section {
+            margin-top: 1.5rem;
+            border-top: 1px solid var(--border-color);
+            padding-top: 1.25rem;
+        }
+
+        .sensor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .sensor-header h3 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-heading);
+        }
+
+        .btn-text {
+            background: none;
+            border: none;
+            color: var(--primary-accent);
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 0;
+        }
+
+        .btn-text:hover {
+            text-decoration: underline;
+        }
+
+        .sensor-inputs-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.85rem;
+        }
+
+        .sensor-field {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .sensor-field label {
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        .sensor-field input {
+            padding: 0.5rem 0.65rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-heading);
+            background: #fafafa;
+            transition: var(--transition);
+        }
+
+        .sensor-field input:focus {
+            outline: none;
+            border-color: var(--primary-accent);
+            background: #ffffff;
+            box-shadow: 0 0 0 3px rgba(64, 145, 108, 0.15);
+        }
+
+        /* Primary Button */
+        .btn-primary {
+            width: 100%;
+            margin-top: 1.5rem;
+            padding: 0.9rem 1.5rem;
+            background-color: var(--primary-medium);
+            color: #ffffff;
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: 1rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            box-shadow: 0 4px 10px rgba(45, 106, 79, 0.25);
+            transition: var(--transition);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background-color: var(--primary-dark);
+            box-shadow: 0 6px 14px rgba(27, 67, 50, 0.35);
+            transform: translateY(-1px);
+        }
+
+        .btn-primary:disabled {
+            background-color: #9ca3af;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        /* Progress & Loading */
+        .progress-box {
+            margin-top: 1.25rem;
+            padding: 0.85rem;
+            background: var(--primary-soft);
+            border-radius: var(--radius-md);
+            text-align: center;
+        }
+
+        .loading-spinner-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+        }
+
+        .spinner-small {
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(27, 67, 50, 0.2);
+            border-top-color: var(--primary-dark);
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+
+        .progress-step-text {
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: var(--primary-dark);
+        }
+
+        .spinner {
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: #ffffff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Badges & Pills */
+        .badge {
+            display: inline-block;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: var(--status-success-bg);
+            color: var(--status-success-text);
+        }
+
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            border-radius: 50px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+        }
+
+        .pill-success, .pill-optimal, .pill-good {
+            background: var(--status-success-bg);
+            color: var(--status-success-text);
+        }
+
+        .pill-warning, .pill-moderate, .pill-fair {
+            background: var(--status-warning-bg);
+            color: var(--status-warning-text);
+        }
+
+        .pill-danger, .pill-unsuitable, .pill-poor, .pill-damaged, .pill-needs-attention {
+            background: var(--status-danger-bg);
+            color: var(--status-danger-text);
+        }
+
+        .pill-neutral {
+            background: var(--status-neutral-bg);
+            color: var(--status-neutral-text);
+        }
+
+        /* Results Content */
+        .crop-main-name {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+        }
+
+        .crop-scientific-name {
+            font-size: 0.95rem;
+            font-style: italic;
+            color: var(--text-muted);
+        }
+
+        .identification-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .confidence-badge {
+            background: var(--primary-soft);
+            color: var(--primary-dark);
+            padding: 0.4rem 0.85rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.88rem;
+            font-weight: 700;
+        }
+
+        .candidates-box {
+            background: #fafafa;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 0.85rem;
+        }
+
+        .candidates-title {
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            display: block;
+            margin-bottom: 0.4rem;
+        }
+
+        .candidates-list {
+            list-style: none;
+            font-size: 0.88rem;
+        }
+
+        .candidates-list li {
+            padding: 0.2rem 0;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .empty-candidate {
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        /* Condition Block */
+        .condition-status-row {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.85rem;
+        }
+
+        .label {
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .issue-block, .explanation-block {
+            margin-bottom: 0.75rem;
+        }
+
+        .issue-text, .explanation-text {
+            font-size: 0.92rem;
+            margin-top: 0.15rem;
+        }
+
+        /* Environmental Matrix */
+        .env-matrix-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .env-item {
+            background: #fcfdfe;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 0.85rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+        }
+
+        .env-label {
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .env-meta {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* Details Grid */
+        .details-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        @media (max-width: 600px) {
+            .details-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .detail-item strong {
+            font-size: 0.85rem;
+            color: var(--primary-dark);
+        }
+
+        .detail-item p {
+            font-size: 0.9rem;
+            color: var(--text-body);
+        }
+
+        .stages-block {
+            margin-top: 0.75rem;
+            border-top: 1px dashed var(--border-color);
+            padding-top: 0.75rem;
+        }
+
+        .stages-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+            margin-top: 0.4rem;
+        }
+
+        .stage-tag {
+            background: var(--primary-soft);
+            color: var(--primary-dark);
+            padding: 0.2rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.78rem;
+            font-weight: 600;
+        }
+
+        /* Irrigation */
+        .moisture-readout {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 0.95rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .recommendation-content p {
+            font-size: 0.92rem;
+            margin-top: 0.2rem;
+            line-height: 1.5;
+        }
+
+        /* Highlight Card */
+        .highlight-card {
+            border-left: 4px solid var(--primary-medium);
+            background: #f6fcf8;
+        }
+
+        .ai-recommendation-body {
+            font-size: 0.95rem;
+            white-space: pre-line;
+            line-height: 1.6;
+        }
+
+        /* Disclaimer Banner */
+        .disclaimer-banner {
+            background: #fffbeb;
+            border: 1px solid #fef3c7;
+            border-radius: var(--radius-md);
+            padding: 1rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        .disclaimer-icon {
+            font-size: 1.2rem;
+        }
+
+        .disclaimer-text {
+            font-size: 0.82rem;
+            color: #92400e;
+            line-height: 1.4;
+        }
+
+        /* Error Alert */
+        .error-alert {
+            background-color: var(--status-danger-bg);
+            border: 1px solid #fca5a5;
+            color: var(--status-danger-text);
+            padding: 0.85rem 1.25rem;
+            border-radius: var(--radius-md);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 500;
+            font-size: 0.92rem;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .alert-close {
+            margin-left: auto;
+            background: none;
+            border: none;
+            color: var(--status-danger-text);
+            font-size: 1.1rem;
+            cursor: pointer;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Footer */
+        .app-footer {
+            text-align: center;
+            padding: 1.5rem;
+            background: #ffffff;
+            border-top: 1px solid var(--border-color);
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            margin-top: auto;
+        }
+    </style>
+</head>
+<body>
+    <header class="app-header">
+        <div class="header-container">
+            <div class="brand">
+                <div class="brand-icon">🌱</div>
+                <div class="brand-text">
+                    <h1>AGRI AI ROVER</h1>
+                    <p class="subtitle">Crop & Seed Intelligence System</p>
+                </div>
+            </div>
+            <div class="header-controls">
+                <button type="button" id="toggleSettingsBtn" class="btn-config">⚙️ Settings & Test</button>
+                <div class="telemetry-badge" id="telemetryStatusBadge">
+                    <span id="badgeDot" class="status-dot"></span>
+                    <span id="badgeModeText" class="status-text">Testing Connection...</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-container">
+        <!-- Settings & Diagnostic Panel -->
+        <div id="settingsPanel" class="settings-panel hidden">
+            <div class="settings-title">⚙️ AI Engine Status & Diagnostics</div>
+            
+            <div class="status-info-grid">
+                <div class="status-info-item">
+                    <span>AI Engine:</span>
+                    <strong id="diagEngine">Gemini Vision AI</strong>
+                </div>
+                <div class="status-info-item">
+                    <span>Connection:</span>
+                    <strong id="diagConn">Checking...</strong>
+                </div>
+                <div class="status-info-item">
+                    <span>Model:</span>
+                    <strong id="diagModel">gemini-3.5-flash-lite</strong>
+                </div>
+                <div class="status-info-item">
+                    <span>API Key:</span>
+                    <strong id="diagKeyStatus">Checking...</strong>
+                </div>
+            </div>
+
+            <div class="settings-field">
+                <label for="backendApiUrlInput">Backend API URL (Render / Python Cloud Host)</label>
+                <input type="text" id="backendApiUrlInput" placeholder="e.g. https://your-agri-rover.onrender.com (Leave empty to auto-detect local server)">
+            </div>
+
+            <div class="settings-field">
+                <label for="geminiApiKeyInput">Gemini API Key (Optional Client Override / Standalone Key)</label>
+                <input type="password" id="geminiApiKeyInput" placeholder="Paste key to override backend (stored in browser only)">
+            </div>
+            
+            <div style="display:flex; gap:0.5rem; flex-wrap:wrap; margin-top:0.5rem;">
+                <button type="button" id="testConnBtn" class="btn-primary" style="margin-top:0; padding:0.5rem 1rem; font-size:0.85rem; width:auto; background:#1b4332;">🧪 Test Connection</button>
+                <button type="button" id="saveKeyBtn" class="btn-primary" style="margin-top:0; padding:0.5rem 1rem; font-size:0.85rem; width:auto;">Save Settings</button>
+                <button type="button" id="clearKeyBtn" class="btn-remove" style="padding:0.5rem 1rem; font-size:0.85rem;">Reset Settings</button>
+            </div>
+            
+            <div id="testOutputBox" style="margin-top:0.75rem; font-size:0.82rem; color:var(--text-body);" class="hidden"></div>
+        </div>
+
+        <!-- Error Alert Bar -->
+        <div id="errorAlert" class="error-alert hidden" role="alert">
+            <span class="alert-icon">⚠️</span>
+            <span id="errorMessage" class="alert-text">Error message here</span>
+            <button type="button" class="alert-close" onclick="hideError()">✕</button>
+        </div>
+
+        <div class="grid-layout">
+            <!-- Left Column: Input Controls -->
+            <section class="card input-card">
+                <h2 class="card-title">
+                    <span class="step-num">1</span>
+                    Upload Image & Sensor Inputs
+                </h2>
+                <p class="card-desc">Upload a seed, crop, leaf, vegetable, or fruit photo for real AI vision analysis.</p>
+
+                <!-- Image Upload Dropzone -->
+                <div class="upload-area" id="dropzone">
+                    <input type="file" id="imageInput" accept="image/png, image/jpeg, image/jpg, image/webp" class="file-input">
+                    <div class="upload-placeholder" id="uploadPlaceholder">
+                        <div class="upload-icon">📷</div>
+                        <p class="upload-prompt"><strong>Drag & drop an image here</strong> or browse</p>
+                        <p class="upload-hint">Supports PNG, JPG, JPEG, WEBP (Seeds, Leaves, Fruits, Grains)</p>
+                    </div>
+
+                    <!-- Image Preview Container -->
+                    <div class="preview-container hidden" id="previewContainer">
+                        <img id="imagePreview" src="" alt="Uploaded sample preview" class="preview-img">
+                        <div class="file-details">
+                            <span id="fileName" class="file-name">sample.jpg</span>
+                            <span id="fileSize" class="file-size">1.2 MB</span>
+                            <span class="badge badge-success">Ready for analysis</span>
+                        </div>
+                        <button type="button" id="removeImgBtn" class="btn-remove">Remove</button>
+                    </div>
+                </div>
+
+                <!-- Sensor Readings Section -->
+                <div class="sensor-section">
+                    <div class="sensor-header">
+                        <h3>Rover Sensor Readings</h3>
+                        <div>
+                            <button type="button" id="syncTelemetryBtn" class="btn-text" title="Fetch live ESP32 telemetry">🔄 Fetch Telemetry</button>
+                            &nbsp;|&nbsp;
+                            <button type="button" id="clearSensorsBtn" class="btn-text" style="color:#888;" title="Clear sensors to test No Live Sensor Data mode">Clear</button>
+                        </div>
+                    </div>
+
+                    <div class="sensor-inputs-grid">
+                        <div class="sensor-field">
+                            <label for="soilMoisture">Soil Moisture (%)</label>
+                            <input type="number" id="soilMoisture" min="0" max="100" step="0.1" value="39.0" placeholder="Optional">
+                        </div>
+
+                        <div class="sensor-field">
+                            <label for="temperature">Temperature (°C)</label>
+                            <input type="number" id="temperature" min="-10" max="60" step="0.1" value="25.0" placeholder="Optional">
+                        </div>
+
+                        <div class="sensor-field">
+                            <label for="humidity">Humidity (% RH)</label>
+                            <input type="number" id="humidity" min="0" max="100" step="0.1" value="68.0" placeholder="Optional">
+                        </div>
+
+                        <div class="sensor-field">
+                            <label for="soilPh">Soil pH</label>
+                            <input type="number" id="soilPh" min="0" max="14" step="0.1" value="7.0" placeholder="Optional">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Primary Action Button -->
+                <button type="button" id="analyzeBtn" class="btn-primary" disabled>
+                    <span id="btnText">ANALYSE IMAGE</span>
+                    <span id="btnSpinner" class="spinner hidden"></span>
+                </button>
+
+                <!-- Loading State Box -->
+                <div id="analysisProgress" class="progress-box hidden">
+                    <div class="loading-spinner-row">
+                        <div class="spinner-small"></div>
+                        <span id="progressStepText" class="progress-step-text">Analyzing image with Gemini Vision...</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Right Column: Results Display -->
+            <section class="results-column">
+
+                <!-- 1. AI Identification Card -->
+                <div class="card result-card">
+                    <h2 class="card-title">AI IDENTIFICATION</h2>
+                    <div class="identification-header">
+                        <div class="crop-names">
+                            <h3 id="resCropName" class="crop-main-name">—</h3>
+                            <p id="resScientificName" class="crop-scientific-name">—</p>
+                        </div>
+                        <div id="resConfidenceBadge" class="confidence-badge placeholder-badge">
+                            Confidence: —
+                        </div>
+                    </div>
+
+                    <div class="candidates-box">
+                        <span class="candidates-title">Identification Candidates:</span>
+                        <ul id="resCandidatesList" class="candidates-list">
+                            <li class="empty-candidate">No analysis performed yet.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- 2. Visible Condition Card -->
+                <div class="card result-card">
+                    <h2 class="card-title">VISIBLE CONDITION</h2>
+                    <div class="condition-status-row">
+                        <span class="label">Physical Condition:</span>
+                        <span id="resConditionPill" class="pill pill-neutral">—</span>
+                    </div>
+                    <div class="issue-block">
+                        <span class="label">Possible Visible Damage/Symptoms:</span>
+                        <p id="resVisibleIssue" class="issue-text">—</p>
+                    </div>
+                    <div class="explanation-block">
+                        <span class="label">Visual Observation:</span>
+                        <p id="resExplanation" class="explanation-text">—</p>
+                    </div>
+                </div>
+
+                <!-- 3. Environmental Fit Card -->
+                <div class="card result-card">
+                    <h2 class="card-title">ENVIRONMENTAL FIT</h2>
+                    <div class="env-matrix-grid">
+                        <div class="env-item">
+                            <span class="env-label">Temperature</span>
+                            <span id="resTempPill" class="pill pill-neutral">—</span>
+                            <span id="resTempMeta" class="env-meta">Current: — | Target: —</span>
+                        </div>
+                        <div class="env-item">
+                            <span class="env-label">Humidity</span>
+                            <span id="resHumidityPill" class="pill pill-neutral">—</span>
+                            <span id="resHumidityMeta" class="env-meta">Current: — | Target: —</span>
+                        </div>
+                        <div class="env-item">
+                            <span class="env-label">Soil Moisture</span>
+                            <span id="resMoisturePill" class="pill pill-neutral">—</span>
+                            <span id="resMoistureMeta" class="env-meta">Current: — | Target: —</span>
+                        </div>
+                        <div class="env-item">
+                            <span class="env-label">Soil pH</span>
+                            <span id="resPhPill" class="pill pill-neutral">—</span>
+                            <span id="resPhMeta" class="env-meta">Current: — | Target: —</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. Crop Profile & Guidance Card -->
+                <div class="card result-card">
+                    <h2 class="card-title">CROP DETAILS & AGRONOMIC PROFILE</h2>
+                    <div class="details-grid">
+                        <div class="detail-item">
+                            <strong>Suitable Soil:</strong>
+                            <p id="resSuitableSoil">—</p>
+                        </div>
+                        <div class="detail-item">
+                            <strong>Preferred pH Range:</strong>
+                            <p id="resPreferredPh">—</p>
+                        </div>
+                        <div class="detail-item">
+                            <strong>Water Requirement:</strong>
+                            <p id="resWaterNeed">—</p>
+                        </div>
+                        <div class="detail-item">
+                            <strong>Uses & Utility:</strong>
+                            <p id="resUsefulness">—</p>
+                        </div>
+                    </div>
+
+                    <div id="growthStagesBlock" class="stages-block hidden">
+                        <strong>Growth Stages:</strong>
+                        <div id="resGrowthStages" class="stages-tags"></div>
+                    </div>
+                </div>
+
+                <!-- 5. Irrigation Guidance Card -->
+                <div class="card result-card">
+                    <h2 class="card-title">IRRIGATION GUIDANCE</h2>
+                    <div class="irrigation-box">
+                        <div class="moisture-readout">
+                            <span>Current Soil Moisture:</span>
+                            <strong id="resCurrentMoistureVal">—</strong>
+                        </div>
+                        <div class="recommendation-content">
+                            <strong>Recommendation:</strong>
+                            <p id="resIrrigationRecommendation">—</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 6. AI Recommendation Card -->
+                <div class="card result-card highlight-card">
+                    <h2 class="card-title">AI AGRICULTURAL RECOMMENDATION</h2>
+                    <div id="resAiRecommendation" class="ai-recommendation-body">
+                        —
+                    </div>
+                </div>
+
+                <!-- Scientific Disclaimer Banner -->
+                <div class="disclaimer-banner">
+                    <span class="disclaimer-icon">ℹ️</span>
+                    <p class="disclaimer-text">
+                        <strong>Scientific Disclaimer:</strong> Image analysis indicates visible physical characteristics and should not be treated as laboratory confirmation of seed germination percentage, internal seed viability, soil fertility, or exact disease diagnosis.
+                    </p>
+                </div>
+
+            </section>
+        </div>
+    </main>
+
+    <footer class="app-footer">
+        <p>AGRI AI ROVER — AI-Powered Agriculture Monitoring & Smart Decision System | SIH Project</p>
+    </footer>
+
+    <script>
+        /**
+         * AGRI AI ROVER - Frontend JavaScript Controller
+         */
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Dynamic & Configurable Backend API URL Resolution
+            function getApiBase() {
+                const savedUrl = localStorage.getItem('AGRI_AI_ROVER_API_BASE');
+                if (savedUrl && savedUrl.trim() !== '') {
+                    return savedUrl.trim().replace(/\/+$/, '');
+                }
+                if (window.AGRI_AI_ROVER_API_BASE && window.AGRI_AI_ROVER_API_BASE.trim() !== '') {
+                    return window.AGRI_AI_ROVER_API_BASE.trim().replace(/\/+$/, '');
+                }
+                const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+                if (isLocal) {
+                    return (window.location.port === '5000') ? '' : 'http://127.0.0.1:5000';
+                }
+                return '';
+            }
+
+            // DOM Elements
+            const toggleSettingsBtn = document.getElementById('toggleSettingsBtn');
+            const settingsPanel = document.getElementById('settingsPanel');
+            const backendApiUrlInput = document.getElementById('backendApiUrlInput');
+            const geminiApiKeyInput = document.getElementById('geminiApiKeyInput');
+            const saveKeyBtn = document.getElementById('saveKeyBtn');
+            const clearKeyBtn = document.getElementById('clearKeyBtn');
+            const testConnBtn = document.getElementById('testConnBtn');
+            const testOutputBox = document.getElementById('testOutputBox');
+
+            const badgeDot = document.getElementById('badgeDot');
+            const badgeModeText = document.getElementById('badgeModeText');
+
+            const diagEngine = document.getElementById('diagEngine');
+            const diagConn = document.getElementById('diagConn');
+            const diagModel = document.getElementById('diagModel');
+            const diagKeyStatus = document.getElementById('diagKeyStatus');
+
+            const dropzone = document.getElementById('dropzone');
+            const imageInput = document.getElementById('imageInput');
+            const uploadPlaceholder = document.getElementById('uploadPlaceholder');
+            const previewContainer = document.getElementById('previewContainer');
+            const imagePreview = document.getElementById('imagePreview');
+            const fileNameDisplay = document.getElementById('fileName');
+            const fileSizeDisplay = document.getElementById('fileSize');
+            const removeImgBtn = document.getElementById('removeImgBtn');
+            const analyzeBtn = document.getElementById('analyzeBtn');
+            const btnText = document.getElementById('btnText');
+            const btnSpinner = document.getElementById('btnSpinner');
+            const syncTelemetryBtn = document.getElementById('syncTelemetryBtn');
+            const clearSensorsBtn = document.getElementById('clearSensorsBtn');
+            
+            // Progress / Loading Elements
+            const analysisProgress = document.getElementById('analysisProgress');
+            const progressStepText = document.getElementById('progressStepText');
+
+            // Alert Bar Elements
+            const errorAlert = document.getElementById('errorAlert');
+            const errorMessage = document.getElementById('errorMessage');
+
+            // Sensor Inputs
+            const soilMoistureInput = document.getElementById('soilMoisture');
+            const temperatureInput = document.getElementById('temperature');
+            const humidityInput = document.getElementById('humidity');
+            const soilPhInput = document.getElementById('soilPh');
+
+            // State Variables
+            let selectedFile = null;
+
+            // Load saved settings into fields
+            if (backendApiUrlInput) {
+                backendApiUrlInput.value = localStorage.getItem('AGRI_AI_ROVER_API_BASE') || '';
+            }
+            if (geminiApiKeyInput) {
+                geminiApiKeyInput.value = localStorage.getItem('AGRI_ROVER_GEMINI_KEY') || '';
+            }
+
+            // Check API status on startup
+            checkApiConnection();
+            fetchTelemetry();
+
+            toggleSettingsBtn.addEventListener('click', () => {
+                settingsPanel.classList.toggle('hidden');
+            });
+
+            testConnBtn.addEventListener('click', async () => {
+                testOutputBox.classList.remove('hidden');
+                testOutputBox.innerHTML = '<span style="color:#2563eb;">🧪 Testing Gemini API connection...</span>';
+                await checkApiConnection(true);
+            });
+
+            saveKeyBtn.addEventListener('click', () => {
+                const urlVal = backendApiUrlInput ? backendApiUrlInput.value.trim() : '';
+                const keyVal = geminiApiKeyInput ? geminiApiKeyInput.value.trim() : '';
+                
+                if (urlVal) {
+                    localStorage.setItem('AGRI_AI_ROVER_API_BASE', urlVal);
+                } else {
+                    localStorage.removeItem('AGRI_AI_ROVER_API_BASE');
+                }
+
+                if (keyVal) {
+                    localStorage.setItem('AGRI_ROVER_GEMINI_KEY', keyVal);
+                } else {
+                    localStorage.removeItem('AGRI_ROVER_GEMINI_KEY');
+                }
+                
+                alert('Settings saved successfully!');
+                checkApiConnection(true);
+            });
+
+            clearKeyBtn.addEventListener('click', () => {
+                if (backendApiUrlInput) backendApiUrlInput.value = '';
+                if (geminiApiKeyInput) geminiApiKeyInput.value = '';
+                localStorage.removeItem('AGRI_AI_ROVER_API_BASE');
+                localStorage.removeItem('AGRI_ROVER_GEMINI_KEY');
+                alert('Settings reset to default auto-detection.');
+                checkApiConnection(true);
+            });
+
+            async function checkApiConnection(verbose = false) {
+                const apiBase = getApiBase();
+                try {
+                    const res = await fetch(apiBase + '/api/test-gemini');
+                    const data = await res.json();
+                    if (res.ok && data.status === 'connected') {
+                        setBadgeState('connected', 'Gemini Vision Connected');
+                        diagConn.textContent = 'Connected (.env Key)';
+                        diagConn.style.color = '#15803d';
+                        diagKeyStatus.textContent = 'Configured (.env)';
+                        diagModel.textContent = data.model || 'gemini-3.5-flash-lite';
+                        if (verbose) testOutputBox.innerHTML = `<span style="color:#15803d;">✅ ${data.message} (${apiBase || 'Local Server'})</span>`;
+                    } else {
+                        setBadgeState('error', 'Gemini API Error');
+                        diagConn.textContent = data.message || 'API Test Failed';
+                        diagConn.style.color = '#b91c1c';
+                        diagKeyStatus.textContent = data.configured ? 'Configured (.env)' : 'Not Configured';
+                        diagModel.textContent = data.model || 'Unknown';
+                        if (verbose) testOutputBox.innerHTML = `<span style="color:#b91c1c;">❌ ${data.message}</span>`;
+                    }
+                } catch (err) {
+                    setBadgeState('error', 'Gemini API Error');
+                    diagConn.textContent = 'Server Offline / Error';
+                    diagConn.style.color = '#b91c1c';
+                    diagKeyStatus.textContent = 'Unknown';
+                    const targetHost = apiBase || 'http://127.0.0.1:5000';
+                    if (verbose) testOutputBox.innerHTML = `<span style="color:#b91c1c;">❌ Cannot connect to AgriAI server at ${targetHost}. Please enter your deployed backend URL in Settings or start local backend (py app.py).</span>`;
+                }
+            }
+
+            function setBadgeState(state, textStr) {
+                badgeModeText.textContent = textStr;
+                badgeDot.className = 'status-dot';
+                if (state === 'connected') {
+                    badgeDot.style.backgroundColor = '#22c55e';
+                    badgeDot.style.boxShadow = '0 0 8px #22c55e';
+                } else if (state === 'demo') {
+                    badgeDot.style.backgroundColor = '#f59e0b';
+                    badgeDot.style.boxShadow = '0 0 8px #f59e0b';
+                } else {
+                    badgeDot.style.backgroundColor = '#ef4444';
+                    badgeDot.style.boxShadow = '0 0 8px #ef4444';
+                }
+            }
+
+            // Drag-and-Drop & File Select
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropzone.addEventListener(eventName, preventDefaults, false);
+            });
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropzone.addEventListener(eventName, () => dropzone.classList.add('drag-over'), false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropzone.addEventListener(eventName, () => dropzone.classList.remove('drag-over'), false);
+            });
+
+            dropzone.addEventListener('drop', (e) => {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                if (files && files.length > 0) handleFileSelect(files[0]);
+            });
+
+            imageInput.addEventListener('change', (e) => {
+                if (e.target.files && e.target.files.length > 0) handleFileSelect(e.target.files[0]);
+            });
+
+            function handleFileSelect(file) {
+                if (!file.type.startsWith('image/')) {
+                    showError("Selected file is not an image. Please select a PNG, JPG, JPEG, or WEBP photo.");
+                    return;
+                }
+
+                hideError();
+                selectedFile = file;
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    imagePreview.src = e.target.result;
+                    fileNameDisplay.textContent = file.name;
+                    fileSizeDisplay.textContent = formatBytes(file.size);
+
+                    uploadPlaceholder.classList.add('hidden');
+                    previewContainer.classList.remove('hidden');
+                    analyzeBtn.disabled = false;
+                };
+                reader.readAsDataURL(file);
+            }
+
+            removeImgBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                resetImageSelection();
+            });
+
+            function resetImageSelection() {
+                selectedFile = null;
+                imageInput.value = '';
+                imagePreview.src = '';
+                uploadPlaceholder.classList.remove('hidden');
+                previewContainer.classList.add('hidden');
+                analyzeBtn.disabled = true;
+            }
+
+            function formatBytes(bytes, decimals = 1) {
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024;
+                const dm = decimals < 0 ? 0 : decimals;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+            }
+
+            syncTelemetryBtn.addEventListener('click', fetchTelemetry);
+            if (clearSensorsBtn) {
+                clearSensorsBtn.addEventListener('click', () => {
+                    soilMoistureInput.value = '';
+                    temperatureInput.value = '';
+                    humidityInput.value = '';
+                    soilPhInput.value = '';
+                });
+            }
+
+            async function fetchTelemetry() {
+                try {
+                    const res = await fetch(getApiBase() + '/api/telemetry');
+                    if (!res.ok) throw new Error("Telemetry fetch failed");
+                    const data = await res.json();
+                    
+                    if (data.soil_moisture !== undefined && data.soil_moisture !== null) soilMoistureInput.value = data.soil_moisture;
+                    if (data.temperature !== undefined && data.temperature !== null) temperatureInput.value = data.temperature;
+                    if (data.humidity !== undefined && data.humidity !== null) humidityInput.value = data.humidity;
+                    if (data.ph !== undefined && data.ph !== null) soilPhInput.value = data.ph;
+                } catch (err) {
+                    console.warn("Telemetry offline or failed:", err.message);
+                }
+            }
+
+            analyzeBtn.addEventListener('click', startAnalysis);
+
+            async function startAnalysis() {
+                if (!selectedFile) {
+                    showError("Please upload an image of a seed, crop, or leaf first.");
+                    return;
+                }
+
+                hideError();
+                setLoadingState(true);
+
+                const formData = new FormData();
+                formData.append('image', selectedFile);
+                if (soilMoistureInput.value !== '') formData.append('soil_moisture', soilMoistureInput.value);
+                if (temperatureInput.value !== '') formData.append('temperature', temperatureInput.value);
+                if (humidityInput.value !== '') formData.append('humidity', humidityInput.value);
+                if (soilPhInput.value !== '') formData.append('ph', soilPhInput.value);
+
+                try {
+                    const response = await fetch(getApiBase() + '/api/analyze', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const result = await response.json();
+
+                    if (!response.ok) {
+                        const errDetail = result.error || "AI analysis failed. Please try again.";
+                        showError(errDetail);
+                        setLoadingState(false);
+                        return;
+                    }
+
+                    renderAnalysisResults(result);
+                    setLoadingState(false);
+
+                } catch (err) {
+                    setLoadingState(false);
+                    showError("Cannot connect to AgriAI backend. Please ensure server is running.");
+                    console.error("API error:", err);
+                }
+            }
+
+            function setLoadingState(isLoading) {
+                if (isLoading) {
+                    analyzeBtn.disabled = true;
+                    btnText.textContent = "ANALYSING...";
+                    btnSpinner.classList.remove('hidden');
+                    analysisProgress.classList.remove('hidden');
+                    progressStepText.textContent = "Analyzing image with Gemini Vision...";
+                } else {
+                    analyzeBtn.disabled = false;
+                    btnText.textContent = "ANALYSE IMAGE";
+                    btnSpinner.classList.add('hidden');
+                    analysisProgress.classList.add('hidden');
+                }
+            }
+
+            function renderAnalysisResults(data) {
+                const identifiedItem = data.identified_item || data.crop_name || "Unknown";
+                document.getElementById('resCropName').textContent = identifiedItem;
+                document.getElementById('resScientificName').textContent = data.scientific_name ? `${data.scientific_name} (${data.category || 'crop'})` : (data.category ? `Category: ${data.category}` : '');
+
+                const confBadge = document.getElementById('resConfidenceBadge');
+                confBadge.classList.remove('placeholder-badge');
+                const confPct = Math.round((data.confidence || 0) * 100);
+                confBadge.textContent = `Confidence: ${confPct}%`;
+                
+                if (confPct >= 80) {
+                    confBadge.style.backgroundColor = 'var(--status-success-bg)';
+                    confBadge.style.color = 'var(--status-success-text)';
+                } else if (confPct >= 50) {
+                    confBadge.style.backgroundColor = 'var(--status-warning-bg)';
+                    confBadge.style.color = 'var(--status-warning-text)';
+                } else {
+                    confBadge.style.backgroundColor = 'var(--status-danger-bg)';
+                    confBadge.style.color = 'var(--status-danger-text)';
+                }
+
+                const candList = document.getElementById('resCandidatesList');
+                candList.innerHTML = '';
+                if (data.candidates && data.candidates.length > 0) {
+                    data.candidates.forEach((cand, idx) => {
+                        const li = document.createElement('li');
+                        const cConfPct = Math.round((cand.confidence || 0) * 100);
+                        li.innerHTML = `<span>${idx + 1}. ${cand.name}</span><strong>${cConfPct}%</strong>`;
+                        candList.appendChild(li);
+                    });
+                } else {
+                    candList.innerHTML = `<li class="empty-candidate">Single candidate classification.</li>`;
+                }
+
+                const condStatus = data.visible_condition || data.visible_condition_status || "Unknown";
+                const condPill = document.getElementById('resConditionPill');
+                condPill.textContent = condStatus;
+                condPill.className = `pill ${getPillClass(condStatus)}`;
+
+                document.getElementById('resVisibleIssue').textContent = data.visible_damage_or_symptoms || data.visible_abnormalities || "None detected";
+                document.getElementById('resExplanation').textContent = data.explanation || "No visual detail provided.";
+
+                const envData = data.environment || {};
+                updateEnvItem('resTempPill', 'resTempMeta', envData.temperature, '°C');
+                updateEnvItem('resHumidityPill', 'resHumidityMeta', envData.humidity, '%');
+                updateEnvItem('resMoisturePill', 'resMoistureMeta', envData.soil_moisture, '%');
+                updateEnvItem('resPhPill', 'resPhMeta', envData.ph, '');
+
+                const cropDetails = data.crop_details || {};
+                document.getElementById('resSuitableSoil').textContent = cropDetails.soil_suitability || "—";
+                document.getElementById('resPreferredPh').textContent = cropDetails.preferred_ph || "—";
+                document.getElementById('resWaterNeed').textContent = cropDetails.water_need || "—";
+                document.getElementById('resUsefulness').textContent = cropDetails.usefulness || "—";
+
+                const growthBlock = document.getElementById('growthStagesBlock');
+                const stagesContainer = document.getElementById('resGrowthStages');
+                stagesContainer.innerHTML = '';
+
+                if (data.growth_guidance && data.growth_guidance.length > 0) {
+                    growthBlock.classList.remove('hidden');
+                    data.growth_guidance.forEach(stage => {
+                        const span = document.createElement('span');
+                        span.className = 'stage-tag';
+                        span.textContent = stage;
+                        stagesContainer.appendChild(span);
+                    });
+                } else {
+                    growthBlock.classList.add('hidden');
+                }
+
+                const irrData = data.irrigation || {};
+                const curMoisture = envData.soil_moisture?.current;
+                document.getElementById('resCurrentMoistureVal').textContent = (curMoisture !== undefined && curMoisture !== "No live sensor data") ? `${curMoisture}%` : "No live sensor data";
+                document.getElementById('resIrrigationRecommendation').textContent = irrData.recommendation || "—";
+
+                document.getElementById('resAiRecommendation').textContent = data.recommendation || "—";
+            }
+
+            function updateEnvItem(pillId, metaId, envObj, unit) {
+                const pill = document.getElementById(pillId);
+                const meta = document.getElementById(metaId);
+
+                if (!envObj) return;
+
+                const rating = envObj.rating || "UNKNOWN";
+                pill.textContent = rating;
+                pill.className = `pill ${getPillClass(rating)}`;
+
+                const curVal = envObj.current;
+                const curText = (curVal !== undefined && curVal !== "No live sensor data") ? `${curVal}${unit}` : "No live sensor data";
+                const idealVal = envObj.ideal || "—";
+                meta.textContent = `Current: ${curText} | Ideal: ${idealVal}`;
+            }
+
+            function getPillClass(statusStr) {
+                const s = statusStr.toUpperCase();
+                if (s.includes('OPTIMAL') || s.includes('GOOD') || s.includes('HEALTHY')) return 'pill-success';
+                if (s.includes('MODERATE') || s.includes('FAIR')) return 'pill-warning';
+                if (s.includes('NEEDS ATTENTION') || s.includes('UNSUITABLE') || s.includes('POOR') || s.includes('DAMAGED') || s.includes('EXCESS') || s.includes('REQUIRED')) return 'pill-danger';
+                return 'pill-neutral';
+            }
+
+            function showError(msg) {
+                errorMessage.textContent = msg;
+                errorAlert.classList.remove('hidden');
+                errorAlert.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+
+            window.hideError = function() {
+                errorAlert.classList.add('hidden');
+            };
+        });
+    </script>
+</body>
+</html>
