@@ -5,6 +5,8 @@ import re
 from typing import Dict, Any, Optional
 from PIL import Image
 from dotenv import load_dotenv
+from google import genai
+from google.genai import types
 
 # Ensure .env file in project root is loaded
 base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -36,120 +38,104 @@ class VisionAIService:
         raw_key = os.environ.get("GEMINI_API_KEY", "")
         self.api_key = raw_key.strip("'\" \n\r\t")
         self.seed_adapter = seed_adapter or SeedClassifierAdapter()
+        # Supported Flash vision models for google.genai SDK
+        self.models = ["gemini-3.6-flash", "gemini-3.5-flash"]
 
     def is_configured(self) -> bool:
         """Checks if GEMINI_API_KEY is configured and valid."""
-        return bool(self.api_key and self.api_key != "PASTE_MY_GEMINI_API_KEY_HERE" and len(self.api_key) > 5)
+        return bool(self.api_key and len(self.api_key) > 5 and not self.api_key.startswith("PASTE_"))
 
     @staticmethod
     def compress_and_resize_image(pil_image: Image.Image, max_dim: int = 1024, quality: int = 80) -> Image.Image:
         """Optimizes uploaded image by resizing to max 1024px and compressing to JPEG quality 80%.
-        Drastically reduces network payload size (from ~5MB to ~80KB) for 5x faster Gemini analysis.
+        Drastically reduces network payload size for fast analysis and minimal memory footprint.
         """
-        # Convert mode to RGB if RGBA/Palette
         if pil_image.mode not in ('RGB', 'L'):
             pil_image = pil_image.convert('RGB')
 
-        # Downscale if width or height > max_dim
         w, h = pil_image.size
         if max(w, h) > max_dim:
             pil_image.thumbnail((max_dim, max_dim), Image.Resampling.LANCZOS)
 
-        # Compress to JPEG buffer
         buf = io.BytesIO()
         pil_image.save(buf, format='JPEG', quality=quality, optimize=True)
         buf.seek(0)
         
         return Image.open(buf)
 
+    def _get_genai_client() -> genai.Client:
+        """Returns initialized google.genai Client with sanitized API key."""
+        if not self.is_configured():
+            raise ValueError("Gemini API key is not configured. Please set GEMINI_API_KEY in environment variables.")
+        return genai.Client(api_key=self.api_key)
+
     def _call_gemini_api(self, pil_image: Image.Image, prompt: str) -> str:
         """Executes a single fast vision model request using official google-genai SDK."""
         if not self.is_configured():
-            raise ValueError("AI API key is not configured. Please set GEMINI_API_KEY in .env file.")
+            raise ValueError("Gemini API key missing. Please set GEMINI_API_KEY in Render environment variables.")
 
-        # Fast multimodal models prioritizing speed
-        fast_models = [
-            "gemini-3.5-flash-lite",
-            "gemini-3.6-flash",
-            "gemini-3.5-flash"
-        ]
+        client = genai.Client(api_key=self.api_key)
+        config = types.GenerateContentConfig(
+            response_mime_type="application/json",
+            temperature=0.1
+        )
 
         last_exception = None
+        for model_name in self.models:
+            try:
+                response = client.models.generate_content(
+                    model=model_name,
+                    contents=[pil_image, prompt],
+                    config=config
+                )
+                if response and response.text:
+                    return response.text
+            except Exception as ex:
+                last_exception = ex
+                continue
 
-        # Try official google-genai SDK
-        try:
-            from google import genai
-            from google.genai import types
-            client = genai.Client(api_key=self.api_key)
-            
-            # Configure structured JSON output + temperature for maximum speed
-            config = types.GenerateContentConfig(
-                response_mime_type="application/json",
-                temperature=0.1
-            )
-            
-            for model_name in fast_models:
-                try:
-                    response = client.models.generate_content(
-                        model=model_name,
-                        contents=[pil_image, prompt],
-                        config=config
-                    )
-                    if response and response.text:
-                        return response.text
-                except Exception as ex:
-                    last_exception = ex
-                    continue
-        except ImportError:
-            pass
-
-        # Fallback to google-generativeai SDK if needed
-        try:
-            import google.generativeai as genai
-            genai.configure(api_key=self.api_key)
-            for model_name in fast_models:
-                try:
-                    model = genai.GenerativeModel(
-                        model_name,
-                        generation_config={"response_mime_type": "application/json", "temperature": 0.1}
-                    )
-                    response = model.generate_content([pil_image, prompt])
-                    if response and response.text:
-                        return response.text
-                except Exception as ex:
-                    last_exception = ex
-                    continue
-        except Exception as e:
-            last_exception = e
-
-        err_msg = str(last_exception)
+        err_msg = str(last_exception) if last_exception else "No response returned from Gemini API"
         if self.api_key and self.api_key in err_msg:
             err_msg = err_msg.replace(self.api_key, "[REDACTED_API_KEY]")
 
         raise RuntimeError(f"Gemini Vision API execution failed: {err_msg}")
 
     def test_connection(self) -> Dict[str, Any]:
-        """Tests live API connectivity with Gemini Vision models."""
+        """Tests live API connectivity with Gemini API using google-genai SDK."""
         if not self.is_configured():
             return {
                 "status": "not_configured",
                 "configured": False,
                 "engine": "Gemini Vision AI",
                 "model": "None",
-                "message": "Gemini API key is not configured in .env file."
+                "message": "Gemini API key is not configured in environment variables."
             }
 
         try:
-            test_img = Image.new('RGB', (10, 10), color='green')
-            prompt = 'Analyze this test sample. Return ONLY valid JSON: {"identified_item": "Test", "status": "ok"}'
-            raw_text = self._call_gemini_api(test_img, prompt)
-            return {
-                "status": "connected",
-                "configured": True,
-                "engine": "Gemini Vision AI",
-                "model": "gemini-3.5-flash-lite",
-                "message": "Gemini Vision API is connected and responding normally!"
-            }
+            client = genai.Client(api_key=self.api_key)
+            config = types.GenerateContentConfig(
+                response_mime_type="application/json",
+                temperature=0.1
+            )
+            
+            # Lightweight text ping without image payload
+            response = client.models.generate_content(
+                model="gemini-3.6-flash",
+                contents='Return ONLY valid JSON: {"status": "ok", "message": "connected"}',
+                config=config
+            )
+
+            if response and response.text:
+                return {
+                    "status": "connected",
+                    "configured": True,
+                    "engine": "Gemini Vision AI",
+                    "model": "gemini-3.6-flash",
+                    "message": "Gemini Vision API is connected and responding normally!"
+                }
+            else:
+                raise RuntimeError("Empty response received from Gemini API test.")
+
         except Exception as e:
             err_msg = str(e)
             if self.api_key and self.api_key in err_msg:
@@ -163,7 +149,7 @@ class VisionAIService:
             }
 
     def analyze_crop_image(self, pil_image: Image.Image) -> Dict[str, Any]:
-        """Compresses image and sends ONE concise fast Gemini Vision request."""
+        """Compresses image and sends concise Gemini Vision request using google-genai SDK."""
         
         # Step 1: Pre-process & compress image for rapid network transfer
         optimized_image = self.compress_and_resize_image(pil_image, max_dim=1024, quality=80)

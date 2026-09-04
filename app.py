@@ -125,7 +125,10 @@ def analyze_crop():
     except ValueError as ve:
         return jsonify({"error": str(ve)}), 400
     except Exception as e:
-        return jsonify({"error": f"Gemini API request failed: {str(e)}"}), 500
+        err_msg = str(e)
+        if vision_service.api_key and vision_service.api_key in err_msg:
+            err_msg = err_msg.replace(vision_service.api_key, "[REDACTED_API_KEY]")
+        return jsonify({"error": f"Gemini API request failed: {err_msg}"}), 500
 
     # 2. Database Lookup
     identified_item = vision_result.get("identified_item") or vision_result.get("crop_name", "")
