@@ -100,42 +100,25 @@ class SmsAlertService:
                 "message": "SMS failed: Twilio credentials not configured. Add TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN and TWILIO_PHONE_NUMBER to environment variables."
             }
 
-        if not self.validate_phone_number(to_number):
+        clean_to = to_number.strip()
+        if not clean_to.startswith("+"):
+            clean_to = "+" + clean_to
+
+        if not self.validate_phone_number(clean_to):
             return {
                 "success": False,
-                "message": "SMS failed: Invalid recipient phone number format."
+                "message": "SMS failed: Invalid recipient phone number format. Must be E.164 format (e.g. +919876543210)."
             }
 
         try:
             from twilio.rest import Client
             client = Client(self.account_sid, self.auth_token)
 
-            is_trial_env = os.environ.get("TWILIO_IS_TRIAL", "").strip().lower() in ("true", "1", "yes") or \
-                           os.environ.get("TWILIO_TRIAL", "").strip().lower() in ("true", "1", "yes")
-
-            if is_trial_env:
-                message = client.messages.create(
-                    content_sid="sms_internal_alerts",
-                    from_=self.from_number,
-                    to=to_number
-                )
-            else:
-                try:
-                    message = client.messages.create(
-                        body=message_body,
-                        from_=self.from_number,
-                        to=to_number
-                    )
-                except Exception as e:
-                    err_msg = str(e).lower()
-                    if any(term in err_msg for term in ["trial", "disallowed parameters", "limited parameter access", "400"]):
-                        message = client.messages.create(
-                            content_sid="sms_internal_alerts",
-                            from_=self.from_number,
-                            to=to_number
-                        )
-                    else:
-                        raise e
+            message = client.messages.create(
+                body=message_body,
+                from_=self.from_number,
+                to=clean_to
+            )
 
             return {
                 "success": True,

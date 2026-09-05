@@ -38,8 +38,8 @@ class VisionAIService:
         raw_key = os.environ.get("GEMINI_API_KEY", "")
         self.api_key = raw_key.strip("'\" \n\r\t")
         self.seed_adapter = seed_adapter or SeedClassifierAdapter()
-        # Supported Flash vision models for google.genai SDK
-        self.models = ["gemini-3.6-flash", "gemini-3.5-flash"]
+        # Supported Flash vision models for google-genai SDK
+        self.models = ["gemini-3.8-flash", "gemini-3.7-flash", "gemini-flash-latest"]
 
     def is_configured(self) -> bool:
         """Checks if GEMINI_API_KEY is configured and valid."""
@@ -113,16 +113,11 @@ class VisionAIService:
 
         try:
             client = genai.Client(api_key=self.api_key)
-            config = types.GenerateContentConfig(
-                response_mime_type="application/json",
-                temperature=0.1
-            )
             
-            # Lightweight text ping without image payload
+            # Minimal text request without image or function calling overhead
             response = client.models.generate_content(
-                model="gemini-3.6-flash",
-                contents='Return ONLY valid JSON: {"status": "ok", "message": "connected"}',
-                config=config
+                model="gemini-3.8-flash",
+                contents="Reply with OK only."
             )
 
             if response and response.text:
@@ -130,7 +125,7 @@ class VisionAIService:
                     "status": "connected",
                     "configured": True,
                     "engine": "Gemini Vision AI",
-                    "model": "gemini-3.6-flash",
+                    "model": "gemini-3.8-flash",
                     "message": "Gemini Vision API is connected and responding normally!"
                 }
             else:
