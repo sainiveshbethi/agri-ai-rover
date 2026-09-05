@@ -109,11 +109,34 @@ class SmsAlertService:
         try:
             from twilio.rest import Client
             client = Client(self.account_sid, self.auth_token)
-            message = client.messages.create(
-                body=message_body,
-                from_=self.from_number,
-                to=to_number
-            )
+
+            is_trial_env = os.environ.get("TWILIO_IS_TRIAL", "").strip().lower() in ("true", "1", "yes") or \
+                           os.environ.get("TWILIO_TRIAL", "").strip().lower() in ("true", "1", "yes")
+
+            if is_trial_env:
+                message = client.messages.create(
+                    content_sid="sms_internal_alerts",
+                    from_=self.from_number,
+                    to=to_number
+                )
+            else:
+                try:
+                    message = client.messages.create(
+                        body=message_body,
+                        from_=self.from_number,
+                        to=to_number
+                    )
+                except Exception as e:
+                    err_msg = str(e).lower()
+                    if any(term in err_msg for term in ["trial", "disallowed parameters", "limited parameter access", "400"]):
+                        message = client.messages.create(
+                            content_sid="sms_internal_alerts",
+                            from_=self.from_number,
+                            to=to_number
+                        )
+                    else:
+                        raise e
+
             return {
                 "success": True,
                 "sid": message.sid,
