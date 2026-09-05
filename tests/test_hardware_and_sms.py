@@ -95,10 +95,12 @@ def test_telemetry_api_endpoints(client):
 
 def test_sms_alert_service_phone_validation():
     sms = SmsAlertService()
-    assert sms.validate_phone_number("+919876543210") is True
-    assert sms.validate_phone_number("+12025550123") is True
-    assert sms.validate_phone_number("invalid-phone") is False
-    assert sms.validate_phone_number("123") is False
+    assert sms.normalize_phone_number("9876543210") == "919876543210"
+    assert sms.normalize_phone_number("+919876543210") == "919876543210"
+    assert sms.normalize_phone_number("09876543210") == "919876543210"
+    assert sms.normalize_phone_number("919876543210") == "919876543210"
+    assert sms.validate_phone_number("9876543210") is True
+    assert sms.validate_phone_number("12345") is False
 
 def test_sms_settings_api(client):
     # Test invalid phone number error
@@ -112,7 +114,7 @@ def test_sms_settings_api(client):
 
     # Test valid phone number save
     good_payload = {
-        "phone_number": "+919876543210",
+        "phone_number": "9876543210",
         "cooldown_minutes": 10,
         "low_soil_moisture": True,
         "high_temperature": True,
@@ -124,26 +126,26 @@ def test_sms_settings_api(client):
     assert res_good.get_json()["status"] == "success"
 
 def test_sms_test_unconfigured(client):
-    # Without valid Twilio env vars, test SMS must return failure message
-    res = client.post('/api/sms/test', json={"phone_number": "+919876543210"})
+    # Without FAST2SMS_API_KEY env var, test SMS must return failure message
+    res = client.post('/api/sms/test', json={"phone_number": "9876543210"})
     json_res = res.get_json()
     assert res.status_code in (400, 200)
     if not json_res.get("success"):
-        assert "twilio" in json_res["message"].lower() or "failed" in json_res["message"].lower()
+        assert "fast2sms" in json_res["message"].lower() or "failed" in json_res["message"].lower() or "not configured" in json_res["message"].lower()
 
 def test_sms_cooldown_and_different_alert_types():
     sms = SmsAlertService()
     sms.save_settings({
-        "phone_number": "+919876543210",
+        "phone_number": "9876543210",
         "cooldown_minutes": 5,
         "low_soil_moisture": True,
         "high_temperature": True
     })
 
-    # Mock send_sms to record calls without hitting Twilio API
+    # Mock send_sms to record calls without hitting Fast2SMS API
     sent_log = []
-    sms.send_sms = lambda phone, msg: sent_log.append(msg) or {"success": True, "sid": "MOCK123"}
-    sms.is_twilio_configured = lambda: True
+    sms.send_sms = lambda phone, msg: sent_log.append((phone, msg)) or {"success": True, "request_id": "REQ123"}
+    sms.is_sms_configured = lambda: True
 
     # Combined anomaly trigger: Low moisture (18% < 30%) AND High temp (39°C > 35°C)
     telemetry_trigger = {
@@ -157,6 +159,12 @@ def test_sms_cooldown_and_different_alert_types():
     alerts1 = sms.evaluate_and_trigger_alerts(telemetry_trigger)
     assert len(alerts1) == 2
     assert len(sent_log) == 2
+
+    # Verify dynamic telemetry message format
+    first_msg = sent_log[0][1]
+    assert "AGRI AI ROVER ALERT" in first_msg
+    assert "Soil Moisture: 18.0%" in first_msg
+    assert "Temperature: 39.0°C" in first_msg
 
     # Immediate second telemetry request -> both low moisture and high temp blocked by independent per-alert cooldown
     alerts2 = sms.evaluate_and_trigger_alerts(telemetry_trigger)
