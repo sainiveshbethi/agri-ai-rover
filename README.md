@@ -1,204 +1,203 @@
 # AGRI AI ROVER 🌾🤖
-### AI-Powered Agriculture Monitoring & Smart Decision System
+### Hardware Integration & AI Agriculture Intelligence System
 *Smart India Hackathon (SIH) Project*
 
 ---
 
 ## 📌 Project Overview
-**AGRI AI ROVER** is a full-stack smart agriculture monitoring platform designed for farmers, agronomists, and agricultural students. It combines **real-time multimodal vision AI (Google Gemini)** with **rover sensor telemetry** (Soil Moisture, Temperature, Humidity, Soil pH) and a structured **Crop Knowledge Database** to provide scientific crop identification, visual health condition diagnosis, environmental suitability matrix, and smart context-aware irrigation guidance.
+**AGRI AI ROVER** is an end-to-end smart agriculture monitoring and hardware intelligence platform. It combines **multimodal vision AI (Google Gemini)** with real-time **ESP32 Rover sensor telemetry** (Soil Moisture, Temperature, Humidity, Soil pH), **ESP32-CAM live streaming & frame capture**, and a **server-side Twilio SMS alert engine** with per-alert cooldown protection.
 
 ---
 
-## 🌟 Key Features
-
-1. **Real Vision AI Image Analysis (No Fake Results)**:
-   - Evaluates user-uploaded photos of seeds, grains, leaves, plants, vegetables, or fruits.
-   - Identifies crop species, scientific names, confidence scores, and alternative candidates.
-   - Detects physical defects, decay/rot, discoloration, lesions, or insect damage.
-   - Returns `"Unknown / Low confidence"` or `"Not a crop/seed or unable to identify"` when uncertain or given non-agricultural images.
-
-2. **Pluggable Seed Classification Architecture**:
-   - Built-in `SeedClassifierAdapter` hook supporting dedicated local seed classification models alongside Gemini Vision AI.
-
-3. **Rover Telemetry & ESP32 Integration**:
-   - `POST /api/telemetry` endpoint for live ESP32 sensor hardware updates.
-   - Manual UI sensor controls for on-site testing.
-
-4. **Structured Crop Knowledge Base**:
-   - Local JSON database covering major Indian agricultural crops: *Paddy/Rice, Wheat, Maize, Soybean, Cotton, Groundnut, Chickpea, Green Gram, Black Gram, Mustard, Sunflower, Tomato, Potato, Chilli, Brinjal*.
-
-5. **Agricultural Decision & Irrigation Engine**:
-   - Evaluates environmental sensor metrics against crop agronomic specifications into 5 categories: `OPTIMAL`, `GOOD`, `MODERATE`, `NEEDS ATTENTION`, `UNSUITABLE`.
-   - Tailors irrigation advice considering crop type + soil moisture + growth stage + temperature + humidity.
-
-6. **Single-File Frontend & Decoupled Production Architecture**:
-   - Entire frontend packaged into single self-contained file: [`agri_ai_rover.html`](file:///c:/Users/SAI%20NIVESH/.antigravity-ide/extensions/vscjava.vscode-maven-0.45.3-universal/agri_ai_rover/agri_ai_rover.html).
-   - Zero Gemini API key exposure on frontend. Key remains 100% server-side on backend.
-
----
-
-## 🛠️ Project Structure
+## 🌟 Architecture & Operating Modes
 
 ```
-agri_ai_rover/
-├── agri_ai_rover.html          # Standalone single-file frontend for Netlify deployment
-├── app.py                      # Flask web server & REST API endpoints
-├── requirements.txt            # Production dependencies (Flask, Flask-CORS, Gunicorn, Pillow)
-├── Procfile                    # Deployment entry point (web: gunicorn app:app)
-├── render.yaml                 # Render Blueprint configuration file
-├── .env                        # Private environment configuration (GEMINI_API_KEY)
-├── .env.example                # Environment variable configuration template
-├── README.md                   # Documentation & deployment guide
-├── services/
-│   ├── __init__.py             # Package initializer
-│   ├── vision.py               # Multimodal Gemini Vision AI & seed adapter
-│   ├── crop_database.py        # Structured crop database search engine
-│   ├── analysis_engine.py      # Agronomic evaluation & irrigation decision engine
-│   └── telemetry.py            # Hardware telemetry cache & state manager
-├── data/
-│   └── crops.json              # 15+ Indian crop profiles database
-├── templates/
-│   └── index.html              # Synchronized frontend template
-└── static/
-    ├── style.css               # Vanilla CSS design system
-    └── app.js                  # Frontend controller
++-------------------------------------------------------------------------------+
+|                                LOCAL LAN MODE                                 |
+|                                                                               |
+|  ESP32-CAM (http://192.168.1.100) ------> Live MJPEG Stream / Frame Capture   |
+|  Main ESP32 (http://192.168.1.101) -----> Direct Sensor Telemetry Fetch       |
+|                                                                               |
++-------------------------------------------------------------------------------+
+                                        │
+                                        ▼
++-------------------------------------------------------------------------------+
+|                                CLOUD MODE                                     |
+|                                                                               |
+|  Main ESP32 -----> HTTPS POST /api/telemetry -----> Render Cloud Server        |
+|                                                          │                    |
+|  Render Cloud Server -----> GET /api/telemetry --------> Web Dashboard        |
+|  Render Cloud Server -----> Twilio API ---------------> SMS Alerts to Farmer |
+|                                                                               |
++-------------------------------------------------------------------------------+
 ```
+
+### 1. Local Mode (Wi-Fi Direct)
+- The browser running on the local Wi-Fi network directly connects to the **ESP32-CAM** (`http://192.168.1.100`) for live MJPEG video streaming and single frame capture.
+- The browser fetches live sensor readings directly from the **Main ESP32** (`http://192.168.1.101/api/telemetry`).
+
+### 2. Cloud Mode (Render Hosted)
+- The **Render cloud backend** (`https://agri-ai-rover.onrender.com`) is a public cloud server. Since cloud servers cannot directly reach private LAN IPs (like `192.168.x.x`), the **Main ESP32** sends telemetry by making outbound HTTPS `POST` requests to `https://agri-ai-rover.onrender.com/api/telemetry`.
+- Render stores the latest hardware readings in memory, tracks connection staleness (`last_seen`), and automatically evaluates sensor thresholds to trigger Twilio SMS alerts.
 
 ---
 
-## 🚀 Quickstart & Local Development
+## 🔒 HTTPS / Local HTTP Mixed-Content Browser Restriction
 
-### 1. Prerequisites
-- Python 3.9 or higher
-- A Google Gemini API Key (obtain from [Google AI Studio](https://aistudio.google.com/))
+When accessing the web app over HTTPS (`https://agri-ai-rover.onrender.com`), modern browsers enforce security policies preventing unencrypted `http://192.168.x.x` streams or API calls from embedding directly inside the HTTPS page (**Mixed Content Restriction**).
 
-### 2. Setup Environment
-Open your terminal in the `agri_ai_rover` project directory:
+**Solutions Provided:**
+1. **Cloud Mode (Recommended for Render)**: Configure Main ESP32 to POST telemetry to Render. Render provides telemetry to the frontend securely over HTTPS.
+2. **Open Camera in New Tab**: Click **OPEN CAMERA** to view the raw camera stream directly in a browser tab.
+3. **Local Testing**: Run the backend locally on `http://127.0.0.1:5000` where HTTP-to-HTTP access is allowed.
+
+---
+
+## 🛠️ Step-by-Step Setup Guide
+
+### STEP 1: Flash ESP32-CAM Firmware
+1. Open `firmware/esp32_cam/esp32_cam.ino` in Arduino IDE.
+2. Select Board: **AI Thinker ESP32-CAM**.
+3. Set your Wi-Fi credentials:
+   ```cpp
+   const char* WIFI_SSID = "YOUR_WIFI_NAME";
+   const char* WIFI_PASSWORD = "YOUR_WIFI_PASSWORD";
+   ```
+4. Flash firmware onto the ESP32-CAM module.
+
+---
+
+### STEP 2: Connect ESP32-CAM to Wi-Fi
+1. Open Serial Monitor at `115200 baud`.
+2. Press the Reset button on ESP32-CAM.
+3. Wait for `[Wi-Fi] Connected!` message.
+
+---
+
+### STEP 3: Copy ESP32-CAM IP Address
+1. Note the assigned IP address in Serial Monitor:
+   ```text
+   ESP32-CAM Ready! Use URL: http://192.168.1.100
+   Live Stream Endpoint: http://192.168.1.100:81/stream
+   ```
+
+---
+
+### STEP 4: Enter ESP32-CAM IP in Website
+1. Open the website interface.
+2. In **ESP32-CAM HARDWARE FEED**, enter `http://192.168.1.100`.
+3. Click **CONNECT CAMERA**.
+4. Green status `🟢 Camera connected` will display with live video stream.
+
+---
+
+### STEP 5: Flash ESP32 Rover Firmware
+1. Open `firmware/esp32_rover/esp32_rover.ino` in Arduino IDE.
+2. Select Board: **ESP32 Dev Module**.
+3. Configure Wi-Fi & Render Backend URL:
+   ```cpp
+   const char* WIFI_SSID = "YOUR_WIFI_NAME";
+   const char* WIFI_PASSWORD = "YOUR_WIFI_PASSWORD";
+   const char* RENDER_BACKEND_URL = "https://agri-ai-rover.onrender.com";
+   ```
+4. Upload firmware to ESP32.
+
+---
+
+### STEP 6: Connect Rover ESP32 to Wi-Fi
+1. Open Serial Monitor at `115200 baud`.
+2. Verify Wi-Fi connection and assigned IP (e.g. `http://192.168.1.101`).
+
+---
+
+### STEP 7: Configure Render Backend URL
+1. Click **⚙️ Settings & Test** on top header.
+2. Enter your Render backend URL:
+   `https://agri-ai-rover.onrender.com`
+3. Click **Save Settings** & **Test Connection**.
+
+---
+
+### STEP 8: Enter ESP32 IP for Local Telemetry
+1. In **MAIN ESP32 ROVER TELEMETRY**, enter `http://192.168.1.101`.
+2. Click **CONNECT ESP32**.
+3. Status badge updates to `🟢 ESP32 connected`.
+
+---
+
+### STEP 9: Add Twilio Environment Variables in Render
+1. Open your Render Dashboard -> Service -> **Environment**.
+2. Add the following variables:
+   - `GEMINI_API_KEY` = `your_gemini_vision_key`
+   - `TWILIO_ACCOUNT_SID` = `ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`
+   - `TWILIO_AUTH_TOKEN` = `your_twilio_auth_token`
+   - `TWILIO_PHONE_NUMBER` = `+1XXXXXXXXXX`
+
+---
+
+### STEP 10: Save SMS Settings
+1. On website under **SMS ALERT SYSTEM**:
+2. Enter Farmer Mobile Number (E.164 format, e.g. `+919876543210`).
+3. Set Cooldown Minutes (default `5`).
+4. Click **SAVE SMS SETTINGS**.
+
+---
+
+### STEP 11: Send TEST SMS
+1. Click **SEND TEST SMS**.
+2. Real SMS dispatch status will display: `✅ SMS sent successfully`.
+
+---
+
+### STEP 12: Verify Real Sensor Values
+1. Submerge moisture sensor or change pH/temperature.
+2. Click **FETCH TELEMETRY** or wait 5 seconds for auto-refresh.
+3. Observe live numbers update instantly!
+
+---
+
+## 🔌 Hardware Pinouts
+
+| Sensor Module | ESP32 Pin | Signal Type | Range / Notes |
+|:---|:---|:---|:---|
+| Capacitive Soil Moisture | **GPIO 34 (A0)** | Analog Input | 0.0% to 100.0% |
+| DHT22 / DHT11 Temp & Humidity | **GPIO 4** | Digital Input | -10°C to 60°C / 0-100% RH |
+| Analog Soil pH Sensor | **GPIO 35** | Analog Input | pH 0.0 to 14.0 |
+| ESP32-CAM Module | **AI-Thinker Pins** | CSI Camera | `/stream` (81) & `/capture` (80) |
+
+---
+
+## 📡 REST API Reference
+
+### Telemetry Endpoints
+- **`GET /api/telemetry`**
+  - Returns current telemetry, connection state, `last_seen`, staleness (`stale: true` if > 30s).
+- **`POST /api/telemetry`**
+  - Payload: `{"device_id": "agri-rover-01", "soil_moisture": 42.5, "temperature": 29.4, "humidity": 71.2, "soil_ph": 6.7}`
+
+### SMS Endpoints
+- **`GET /api/sms/settings`**: Returns current SMS alert settings & Twilio configuration state.
+- **`POST /api/sms/settings`**: Saves farmer mobile number, cooldown timer, and enabled alert flags.
+- **`POST /api/sms/test`**: Sends real test SMS via Twilio.
+
+### Vision AI Endpoint
+- **`POST /api/analyze`**: Multipart form data with `image` file and optional sensor readings. Processes through multimodal Gemini Vision AI.
+
+---
+
+## 🧪 Running Automated Tests
+
+Run the automated pytest test suite covering telemetry staleness, validation, SMS settings, Twilio failure handling, and alert cooldowns:
 
 ```bash
-# Create virtual environment (optional)
-py -m venv venv
-# On Windows PowerShell:
-.\venv\Scripts\Activate.ps1
-
-# Install required dependencies
-py -m pip install -r requirements.txt
+py -m pytest tests/
 ```
 
-### 3. Configure API Key
-Copy `.env.example` to `.env` and add your Gemini API Key:
-
-```env
-GEMINI_API_KEY=AIzaSy...your_actual_gemini_api_key...
-PORT=5000
-FLASK_ENV=development
+Output:
+```text
+tests/test_hardware_and_sms.py ....... [100%]
+7 passed in 4.58s
 ```
-
-### 4. Run Application Locally
-```bash
-python app.py
-# or using py launcher:
-py app.py
-```
-
-Access the application in your web browser:
-👉 **`http://127.0.0.1:5000`**
-
----
-
-## 🌐 Production Deployment Architecture (Netlify + Render)
-
-To make the application available publicly so anyone can access the site from any browser without exposing your Gemini API key:
-
-```
-┌───────────────────────────────┐                  ┌───────────────────────────────┐
-│       NETLIFY FRONTEND        │                  │         RENDER BACKEND        │
-│    (agri_ai_rover.html)       │ ───────────────> │           (app.py)            │
-│  Public Single-Page Website   │   HTTPS API      │  Hosts Gemini API Key safely  │
-└───────────────────────────────┘   Requests       └───────────────────────────────┘
-                                                          │
-                                                          ▼
-                                                   ┌──────────────┐
-                                                   │ Google Gemini│
-                                                   │ Vision AI API│
-                                                   └──────────────┘
-```
-
-### Step 1: Deploy Backend to Render (Python Host)
-
-1. Push your project code to a **GitHub / GitLab repository**.
-2. Log in to [Render Dashboard](https://dashboard.render.com/).
-3. Click **New +** -> **Web Service**.
-4. Connect your repository and select the `agri_ai_rover` folder.
-5. Set the following build settings:
-   - **Environment**: `Python 3`
-   - **Build Command**: `pip install -r requirements.txt`
-   - **Start Command**: `gunicorn app:app`
-6. Under **Environment Variables**, add:
-   - `GEMINI_API_KEY` = `your_actual_gemini_api_key`
-   - `FLASK_ENV` = `production`
-7. Click **Create Web Service**.
-8. Once deployed, copy your public Render URL (e.g., `https://agri-ai-rover-backend.onrender.com`).
-
----
-
-### Step 2: Deploy Frontend to Netlify
-
-1. Log in to [Netlify](https://app.netlify.com/).
-2. Click **Add new site** -> **Deploy manually**.
-3. Drag and drop the `agri_ai_rover.html` file (or select the project root folder).
-4. Netlify will deploy your single-file frontend immediately and give you a site URL (e.g., `https://your-agri-rover.netlify.app`).
-
----
-
-### Step 3: Connect Frontend to Render Backend
-
-1. Open your Netlify site URL (`https://your-agri-rover.netlify.app`) in any web browser.
-2. Click **⚙️ Settings / Diagnostics** in the top navigation bar.
-3. In **Backend API URL**, enter your deployed Render backend URL:
-   `https://agri-ai-rover-backend.onrender.com`
-4. Click **Save Settings** & **🧪 Test Connection**.
-5. You will see `✅ Gemini Vision API is connected and responding normally!`.
-6. Your production deployment is now live and fully operational!
-
-> **Note**: You can also pre-set your backend URL in JavaScript by defining `window.AGRI_AI_ROVER_API_BASE = 'https://agri-ai-rover-backend.onrender.com';` inside `<script>` before deploying to Netlify.
-
----
-
-## 📡 Hardware / ESP32 Telemetry API
-
-The AGRI AI ROVER backend accepts sensor telemetry directly from ESP32 microcontrollers over HTTP:
-
-### Submit Telemetry (`POST /api/telemetry`)
-**Request Body:**
-```json
-{
-  "soil_moisture": 39.5,
-  "temperature": 25.4,
-  "humidity": 68.0,
-  "ph": 7.0
-}
-```
-
-**cURL Example:**
-```bash
-curl -X POST https://agri-ai-rover-backend.onrender.com/api/telemetry \
-     -H "Content-Type: application/json" \
-     -d '{"soil_moisture": 39.5, "temperature": 25.4, "humidity": 68.0, "ph": 7.0}'
-```
-
-### Retrieve Telemetry (`GET /api/telemetry`)
-```bash
-curl https://agri-ai-rover-backend.onrender.com/api/telemetry
-```
-
----
-
-## 🧪 Testing Guidelines
-
-1. **Healthy Crop Sample**: Upload a clear photo of a fresh tomato or healthy paddy leaf. Expect high confidence identification and "Healthy / Good" condition status.
-2. **Diseased/Spoiled Crop**: Upload a photo of a rotten fruit or leaf with fungal spots. Expect accurate crop identification with "Poor" or "Damaged" condition and visible issue detection.
-3. **Non-Agricultural Image**: Upload an image of a car, shoes, or gadget. System will return `"Not a crop/seed or unable to identify"` with 0% confidence.
 
 ---
 

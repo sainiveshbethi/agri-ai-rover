@@ -9,6 +9,7 @@ from services.vision import VisionAIService
 from services.crop_database import CropDatabaseService
 from services.analysis_engine import AgriculturalDecisionEngine
 from services.telemetry import TelemetryService
+from services.sms_alert import SmsAlertService
 
 # Load environment variables from .env file
 load_dotenv()
@@ -22,6 +23,7 @@ vision_service = VisionAIService()
 crop_db_service = CropDatabaseService()
 decision_engine = AgriculturalDecisionEngine()
 telemetry_service = TelemetryService()
+sms_alert_service = SmsAlertService()
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'webp'}
 
@@ -55,18 +57,62 @@ def handle_telemetry():
     if request.method == 'OPTIONS':
         return '', 200
     if request.method == 'POST':
+        # Verify Rover Authentication Token if configured on server
+        expected_token = os.environ.get("ROVER_API_TOKEN", "").strip()
+        if expected_token:
+            auth_header = request.headers.get("Authorization", "")
+            if auth_header != f"Bearer {expected_token}":
+                return jsonify({
+                    "status": "error",
+                    "message": "Unauthorized: Missing or invalid Rover API Token"
+                }), 401
+
         try:
             data = request.get_json(force=True, silent=True) or {}
             updated = telemetry_service.update_telemetry(data)
+            dispatched_alerts = sms_alert_service.evaluate_and_trigger_alerts(updated)
             return jsonify({
                 "status": "success",
                 "message": "Telemetry updated successfully",
-                "telemetry": updated
+                "telemetry": updated,
+                "alerts_triggered": len(dispatched_alerts)
             }), 200
         except Exception as e:
             return jsonify({"status": "error", "message": str(e)}), 400
     else:
         return jsonify(telemetry_service.get_telemetry()), 200
+
+@app.route('/api/sms/settings', methods=['GET', 'POST', 'OPTIONS'])
+def sms_settings():
+    """Endpoint for reading and saving SMS alert system configurations."""
+    if request.method == 'OPTIONS':
+        return '', 200
+    if request.method == 'POST':
+        try:
+            data = request.get_json(force=True, silent=True) or {}
+            updated = sms_alert_service.save_settings(data)
+            return jsonify({
+                "status": "success",
+                "message": "SMS settings saved successfully",
+                "data": updated
+            }), 200
+        except ValueError as ve:
+            return jsonify({"status": "error", "message": str(ve)}), 400
+        except Exception as e:
+            return jsonify({"status": "error", "message": str(e)}), 500
+    else:
+        return jsonify(sms_alert_service.get_settings()), 200
+
+@app.route('/api/sms/test', methods=['POST', 'OPTIONS'])
+def sms_test():
+    """Endpoint for sending real test SMS via Twilio."""
+    if request.method == 'OPTIONS':
+        return '', 200
+    data = request.get_json(force=True, silent=True) or {}
+    target_phone = data.get("phone_number")
+    res = sms_alert_service.send_test_sms(target_phone)
+    status_code = 200 if res.get("success") else 400
+    return jsonify(res), status_code
 
 @app.route('/api/analyze', methods=['POST', 'OPTIONS'])
 def analyze_crop():

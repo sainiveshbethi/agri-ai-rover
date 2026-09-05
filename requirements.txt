@@ -5,3 +5,5 @@ google-genai>=0.1.1
 python-dotenv>=1.0.0
 pillow>=10.0.0
 requests>=2.31.0
+twilio>=8.0.0
+pytest>=7.0.0

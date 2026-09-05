@@ -816,6 +816,146 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
+        /* Hardware Cards & Telemetry Styles */
+        .hw-section {
+            margin-top: 1.5rem;
+            border-top: 1px solid var(--border-color);
+            padding-top: 1.25rem;
+        }
+
+        .hw-card-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--primary-soft);
+            padding-bottom: 0.5rem;
+            margin-bottom: 0.85rem;
+        }
+
+        .status-indicator-badge {
+            font-size: 0.78rem;
+            font-weight: 600;
+            padding: 0.25rem 0.65rem;
+            border-radius: 50px;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .status-badge-disconnected {
+            background-color: var(--status-danger-bg);
+            color: var(--status-danger-text);
+        }
+
+        .status-badge-connected {
+            background-color: var(--status-success-bg);
+            color: var(--status-success-text);
+        }
+
+        .status-badge-connecting {
+            background-color: var(--status-warning-bg);
+            color: var(--status-warning-text);
+        }
+
+        .stream-preview-box {
+            width: 100%;
+            height: 220px;
+            background: #111827;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #9ca3af;
+            font-size: 0.85rem;
+            margin: 0.85rem 0;
+            text-align: center;
+            padding: 1rem;
+        }
+
+        .stream-preview-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .hw-btn-group {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-top: 0.75rem;
+        }
+
+        .btn-secondary {
+            background: var(--primary-medium);
+            color: #ffffff;
+            border: none;
+            padding: 0.5rem 0.85rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-secondary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--primary-accent);
+            color: var(--primary-accent);
+            padding: 0.5rem 0.85rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-outline:hover {
+            background: var(--primary-soft);
+        }
+
+        .mixed-content-banner {
+            background: #fff8f6;
+            border: 1px solid #fecaca;
+            color: #991b1b;
+            padding: 0.65rem 0.85rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.78rem;
+            margin-top: 0.75rem;
+            line-height: 1.4;
+        }
+
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+            margin: 0.75rem 0;
+            font-size: 0.82rem;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            color: var(--text-body);
+        }
+
+        .sms-status-box {
+            margin-top: 0.75rem;
+            padding: 0.65rem 0.85rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.82rem;
+            font-weight: 500;
+        }
+
         /* Footer */
         .app-footer {
             text-align: center;
@@ -974,11 +1114,137 @@
                         <div class="spinner-small"></div>
                         <span id="progressStepText" class="progress-step-text">Analyzing image with Gemini Vision...</span>
                     </div>
+            </section>
+
+            <!-- Hardware Integration Cards -->
+            <section class="card hw-card">
+                <div class="hw-card-title">
+                    <span>📷 ESP32-CAM HARDWARE FEED</span>
+                    <span id="camStatusBadge" class="status-indicator-badge status-badge-disconnected">🔴 Camera not connected</span>
+                </div>
+                <p class="card-desc">Connect live ESP32-CAM module for real-time video stream and AI frame capture.</p>
+
+                <div class="settings-field">
+                    <label for="esp32CamIp">ESP32-CAM Base URL / IP Address</label>
+                    <input type="text" id="esp32CamIp" placeholder="e.g. http://192.168.1.100" value="http://192.168.1.100">
+                </div>
+
+                <div class="sensor-inputs-grid" style="margin-top: 0.5rem; grid-template-columns: 80px 1fr 1fr;">
+                    <div class="sensor-field">
+                        <label for="camStreamPort">Port</label>
+                        <input type="text" id="camStreamPort" value="81" placeholder="81">
+                    </div>
+                    <div class="sensor-field">
+                        <label for="camStreamEndpoint">Stream Path</label>
+                        <input type="text" id="camStreamEndpoint" value="/stream" placeholder="/stream">
+                    </div>
+                    <div class="sensor-field">
+                        <label for="camCaptureEndpoint">Capture Path</label>
+                        <input type="text" id="camCaptureEndpoint" value="/capture" placeholder="/capture">
+                    </div>
+                </div>
+
+                <!-- Live Stream Preview Container -->
+                <div class="stream-preview-box" id="camStreamContainer">
+                    <span id="camStreamPlaceholder">Camera disconnected. Click <strong>CONNECT CAMERA</strong> to view live stream.</span>
+                    <img id="camStreamImg" src="" alt="ESP32-CAM Stream" class="hidden">
+                </div>
+
+                <!-- Mixed Content Alert Banner -->
+                <div id="camMixedContentNotice" class="mixed-content-banner hidden">
+                    <strong>⚠️ Browser Mixed-Content Limitation:</strong><br>
+                    Local ESP32-CAM access is unavailable from this HTTPS page. Use Local Mode with the frontend served over HTTP on the same Wi-Fi, or provide a secure/public camera relay.
+                </div>
+
+                <div class="hw-btn-group">
+                    <button type="button" id="connectCamBtn" class="btn-secondary">📡 CONNECT CAMERA</button>
+                    <button type="button" id="captureCamBtn" class="btn-outline">📸 CAPTURE IMAGE</button>
+                    <button type="button" id="openCamBtn" class="btn-text" style="padding: 0.5rem; font-size: 0.82rem;">🔗 OPEN CAMERA</button>
                 </div>
             </section>
 
-            <!-- Right Column: Results Display -->
-            <section class="results-column">
+            <section class="card hw-card">
+                <div class="hw-card-title">
+                    <span>🚜 MAIN ESP32 ROVER TELEMETRY</span>
+                    <span id="roverStatusBadge" class="status-indicator-badge status-badge-disconnected">🔴 ESP32 not connected</span>
+                </div>
+                <p class="card-desc">Read live sensor readings directly from local ESP32 IP or cloud telemetry sync.</p>
+
+                <div class="settings-field">
+                    <label for="esp32RoverIp">ESP32 Rover Local IP / Address</label>
+                    <input type="text" id="esp32RoverIp" placeholder="e.g. http://192.168.1.101" value="http://192.168.1.101">
+                </div>
+
+                <div class="status-info-grid" style="margin: 0.75rem 0;">
+                    <div class="status-info-item">
+                        <span>Mode:</span>
+                        <strong id="telemetryModeText">Cloud / Auto Mode</strong>
+                    </div>
+                    <div class="status-info-item">
+                        <span>Freshness:</span>
+                        <strong id="telemetryFreshnessText">No data received</strong>
+                    </div>
+                </div>
+
+                <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.75rem; font-size:0.82rem;">
+                    <input type="checkbox" id="autoRefreshCheck" checked>
+                    <label for="autoRefreshCheck" style="cursor:pointer; font-weight:500;">Auto-refresh telemetry every 5 seconds</label>
+                </div>
+
+                <div class="hw-btn-group">
+                    <button type="button" id="connectRoverBtn" class="btn-secondary">📡 CONNECT ESP32</button>
+                    <button type="button" id="fetchTelemetryActionBtn" class="btn-outline">🔄 FETCH TELEMETRY</button>
+                    <button type="button" id="openRoverBtn" class="btn-text" style="padding: 0.5rem; font-size: 0.82rem;">🔗 OPEN ESP32</button>
+                </div>
+            </section>
+
+            <section class="card hw-card">
+                <div class="hw-card-title">
+                    <span>📱 SMS ALERT SYSTEM</span>
+                    <span id="smsConfigBadge" class="status-indicator-badge status-badge-disconnected">SMS Not Configured</span>
+                </div>
+                <p class="card-desc">Server-side Twilio mobile alerts triggered by field sensor anomalies with server-enforced cooldowns.</p>
+
+                <div class="settings-field">
+                    <label for="smsPhoneInput">Farmer Mobile Number (E.164 Format)</label>
+                    <input type="tel" id="smsPhoneInput" placeholder="e.g. +919876543210 or +1234567890">
+                </div>
+
+                <div class="settings-field">
+                    <label for="smsCooldownInput">Alert Cooldown (Minutes)</label>
+                    <input type="number" id="smsCooldownInput" min="1" max="120" value="5">
+                </div>
+
+                <div class="checkbox-group">
+                    <label class="checkbox-item">
+                        <input type="checkbox" id="smsLowMoistureCheck" checked>
+                        <span>Low Moisture (&lt; 30%)</span>
+                    </label>
+                    <label class="checkbox-item">
+                        <input type="checkbox" id="smsHighTempCheck" checked>
+                        <span>High Temp (&gt; 35°C)</span>
+                    </label>
+                    <label class="checkbox-item">
+                        <input type="checkbox" id="smsAbnormalHumidityCheck" checked>
+                        <span>Abnormal Humidity</span>
+                    </label>
+                    <label class="checkbox-item">
+                        <input type="checkbox" id="smsAbnormalPhCheck" checked>
+                        <span>Abnormal Soil pH</span>
+                    </label>
+                </div>
+
+                <div class="hw-btn-group">
+                    <button type="button" id="saveSmsBtn" class="btn-secondary">💾 SAVE SMS SETTINGS</button>
+                    <button type="button" id="testSmsBtn" class="btn-outline">💬 SEND TEST SMS</button>
+                </div>
+
+                <div id="smsStatusBox" class="sms-status-box hidden"></div>
+            </section>
+        </div>
+
+        <!-- Right Column: Results Display -->
+        <section class="results-column">
 
                 <!-- 1. AI Identification Card -->
                 <div class="card result-card">
@@ -1371,11 +1637,452 @@
                     if (data.soil_moisture !== undefined && data.soil_moisture !== null) soilMoistureInput.value = data.soil_moisture;
                     if (data.temperature !== undefined && data.temperature !== null) temperatureInput.value = data.temperature;
                     if (data.humidity !== undefined && data.humidity !== null) humidityInput.value = data.humidity;
-                    if (data.ph !== undefined && data.ph !== null) soilPhInput.value = data.ph;
+                    const phVal = data.soil_ph !== undefined && data.soil_ph !== null ? data.soil_ph : data.ph;
+                    if (phVal !== undefined && phVal !== null) soilPhInput.value = phVal;
                 } catch (err) {
                     console.warn("Telemetry offline or failed:", err.message);
                 }
             }
+
+            // =========================================================================
+            // ESP32-CAM INTEGRATION CONTROLLER
+            // =========================================================================
+            const esp32CamIpInput = document.getElementById('esp32CamIp');
+            const camStreamPortInput = document.getElementById('camStreamPort');
+            const camStreamEndpointInput = document.getElementById('camStreamEndpoint');
+            const camCaptureEndpointInput = document.getElementById('camCaptureEndpoint');
+            const camStatusBadge = document.getElementById('camStatusBadge');
+            const connectCamBtn = document.getElementById('connectCamBtn');
+            const captureCamBtn = document.getElementById('captureCamBtn');
+            const openCamBtn = document.getElementById('openCamBtn');
+            const camStreamImg = document.getElementById('camStreamImg');
+            const camStreamPlaceholder = document.getElementById('camStreamPlaceholder');
+            const camMixedContentNotice = document.getElementById('camMixedContentNotice');
+
+            let isCamConnected = false;
+
+            // Load saved ESP32-CAM IP
+            const savedCamIp = localStorage.getItem('AGRI_ESP32_CAM_IP');
+            if (savedCamIp && esp32CamIpInput) {
+                esp32CamIpInput.value = savedCamIp;
+            }
+
+            function getCamBaseUrl() {
+                let val = (esp32CamIpInput ? esp32CamIpInput.value : '').trim();
+                if (!val) return '';
+                if (!val.startsWith('http://') && !val.startsWith('https://')) {
+                    val = 'http://' + val;
+                }
+                return val.replace(/\/+$/, '');
+            }
+
+            function getCamStreamUrl() {
+                const baseUrl = getCamBaseUrl();
+                if (!baseUrl) return '';
+                const portVal = (camStreamPortInput ? camStreamPortInput.value : '').trim();
+                const streamPath = (camStreamEndpointInput ? camStreamEndpointInput.value : '/stream').trim();
+                
+                if (baseUrl.match(/:\d+$/)) {
+                    return baseUrl + streamPath;
+                }
+                if (portVal && portVal !== '80') {
+                    return baseUrl + ':' + portVal + streamPath;
+                }
+                return baseUrl + streamPath;
+            }
+
+            connectCamBtn.addEventListener('click', connectEsp32Cam);
+            openCamBtn.addEventListener('click', () => {
+                const url = getCamStreamUrl() || getCamBaseUrl();
+                if (url) window.open(url, '_blank');
+                else showError("Please enter a valid ESP32-CAM IP address first.");
+            });
+
+            async function connectEsp32Cam() {
+                const baseUrl = getCamBaseUrl();
+                if (!baseUrl) {
+                    showError("Please enter a valid ESP32-CAM URL (e.g. http://192.168.1.100).");
+                    return;
+                }
+                localStorage.setItem('AGRI_ESP32_CAM_IP', baseUrl);
+
+                camStatusBadge.className = 'status-indicator-badge status-badge-connecting';
+                camStatusBadge.textContent = '🟡 Connecting...';
+
+                // Check browser mixed content restriction
+                const isPageHttps = window.location.protocol === 'https:';
+                const isCamHttp = baseUrl.startsWith('http:');
+                if (isPageHttps && isCamHttp) {
+                    camMixedContentNotice.classList.remove('hidden');
+                } else {
+                    camMixedContentNotice.classList.add('hidden');
+                }
+
+                const captureEp = (camCaptureEndpointInput ? camCaptureEndpointInput.value : '/capture').trim();
+                const streamUrl = getCamStreamUrl();
+
+                try {
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 3500);
+                    await fetch(baseUrl + captureEp, { method: 'HEAD', signal: controller.signal, mode: 'cors' }).catch(() => null);
+                    clearTimeout(timeoutId);
+
+                    camStatusBadge.className = 'status-indicator-badge status-badge-connected';
+                    camStatusBadge.textContent = '🟢 Camera connected';
+                    isCamConnected = true;
+
+                    camStreamImg.src = streamUrl;
+                    camStreamImg.crossOrigin = 'anonymous';
+                    camStreamImg.classList.remove('hidden');
+                    camStreamPlaceholder.classList.add('hidden');
+
+                } catch (err) {
+                    console.warn("Camera ping failed, attempting direct stream load:", err);
+                    camStreamImg.src = streamUrl;
+                    camStreamImg.crossOrigin = 'anonymous';
+                    camStreamImg.onload = () => {
+                        camStatusBadge.className = 'status-indicator-badge status-badge-connected';
+                        camStatusBadge.textContent = '🟢 Camera connected';
+                        isCamConnected = true;
+                        camStreamImg.classList.remove('hidden');
+                        camStreamPlaceholder.classList.add('hidden');
+                    };
+                    camStreamImg.onerror = () => {
+                        camStatusBadge.className = 'status-indicator-badge status-badge-disconnected';
+                        camStatusBadge.textContent = '🔴 Camera not connected';
+                        isCamConnected = false;
+                        camStreamImg.classList.add('hidden');
+                        camStreamPlaceholder.classList.remove('hidden');
+                        camStreamPlaceholder.innerHTML = `Camera unreachable at ${baseUrl}. Verify ESP32-CAM is powered on and on the same Wi-Fi network.`;
+                    };
+                }
+            }
+
+            captureCamBtn.addEventListener('click', async () => {
+                const baseUrl = getCamBaseUrl();
+                if (!baseUrl) {
+                    showError("Please configure ESP32-CAM URL first.");
+                    return;
+                }
+
+                const captureEp = (camCaptureEndpointInput ? camCaptureEndpointInput.value : '/capture').trim();
+                const captureUrl = baseUrl + captureEp;
+
+                try {
+                    btnText.textContent = "CAPTURING...";
+                    const res = await fetch(captureUrl, { mode: 'cors' });
+                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                    const blob = await res.blob();
+                    
+                    const capturedFile = new File([blob], `esp32_cam_${Date.now()}.jpg`, { type: 'image/jpeg' });
+                    handleFileSelect(capturedFile);
+                    hideError();
+                } catch (err) {
+                    console.warn("Direct /capture fetch failed, trying canvas frame capture:", err);
+                    if (camStreamImg && !camStreamImg.classList.contains('hidden') && camStreamImg.naturalWidth > 0) {
+                        try {
+                            const canvas = document.createElement('canvas');
+                            canvas.width = camStreamImg.naturalWidth || 640;
+                            canvas.height = camStreamImg.naturalHeight || 480;
+                            const ctx = canvas.getContext('2d');
+                            ctx.drawImage(camStreamImg, 0, 0);
+                            canvas.toBlob((blob) => {
+                                if (blob) {
+                                    const capturedFile = new File([blob], `esp32_stream_frame_${Date.now()}.jpg`, { type: 'image/jpeg' });
+                                    handleFileSelect(capturedFile);
+                                    hideError();
+                                } else {
+                                    showError("Unable to capture image from ESP32-CAM.");
+                                }
+                            }, 'image/jpeg', 0.9);
+                        } catch (canvasErr) {
+                            showError("Unable to capture image from ESP32-CAM.");
+                        }
+                    } else {
+                        showError("Unable to capture image from ESP32-CAM.");
+                    }
+                } finally {
+                    btnText.textContent = "ANALYSE IMAGE";
+                }
+            });
+
+
+            // =========================================================================
+            // MAIN ESP32 ROVER TELEMETRY CONTROLLER
+            // =========================================================================
+            const esp32RoverIpInput = document.getElementById('esp32RoverIp');
+            const roverStatusBadge = document.getElementById('roverStatusBadge');
+            const connectRoverBtn = document.getElementById('connectRoverBtn');
+            const fetchTelemetryActionBtn = document.getElementById('fetchTelemetryActionBtn');
+            const openRoverBtn = document.getElementById('openRoverBtn');
+            const autoRefreshCheck = document.getElementById('autoRefreshCheck');
+            const telemetryModeText = document.getElementById('telemetryModeText');
+            const telemetryFreshnessText = document.getElementById('telemetryFreshnessText');
+
+            let autoRefreshIntervalId = null;
+            let lastTelemetryTimestamp = null;
+
+            const savedRoverIp = localStorage.getItem('AGRI_ESP32_ROVER_IP');
+            if (savedRoverIp && esp32RoverIpInput) {
+                esp32RoverIpInput.value = savedRoverIp;
+            }
+
+            function getRoverBaseUrl() {
+                let val = (esp32RoverIpInput ? esp32RoverIpInput.value : '').trim();
+                if (!val) return '';
+                if (!val.startsWith('http://') && !val.startsWith('https://')) {
+                    val = 'http://' + val;
+                }
+                return val.replace(/\/+$/, '');
+            }
+
+            connectRoverBtn.addEventListener('click', connectEsp32Rover);
+            fetchTelemetryActionBtn.addEventListener('click', fetchTelemetry);
+            openRoverBtn.addEventListener('click', () => {
+                const url = getRoverBaseUrl();
+                if (url) window.open(url, '_blank');
+                else showError("Please enter ESP32 Rover IP first.");
+            });
+
+            autoRefreshCheck.addEventListener('change', () => {
+                if (autoRefreshCheck.checked) {
+                    startAutoRefresh();
+                } else {
+                    stopAutoRefresh();
+                }
+            });
+
+            async function connectEsp32Rover() {
+                const localUrl = getRoverBaseUrl();
+                if (localUrl) localStorage.setItem('AGRI_ESP32_ROVER_IP', localUrl);
+
+                roverStatusBadge.className = 'status-indicator-badge status-badge-connecting';
+                roverStatusBadge.textContent = '🟡 Connecting...';
+
+                let localSuccess = false;
+                if (localUrl) {
+                    try {
+                        const controller = new AbortController();
+                        const timeoutId = setTimeout(() => controller.abort(), 3000);
+                        const res = await fetch(localUrl + '/api/telemetry', { signal: controller.signal, mode: 'cors' });
+                        clearTimeout(timeoutId);
+                        if (res.ok) {
+                            const data = await res.json();
+                            applyTelemetryData(data);
+                            roverStatusBadge.className = 'status-indicator-badge status-badge-connected';
+                            roverStatusBadge.textContent = '🟢 ESP32 connected';
+                            telemetryModeText.textContent = 'Local LAN Mode';
+                            localSuccess = true;
+                        }
+                    } catch (err) {
+                        console.warn("Local ESP32 fetch failed, falling back to Cloud backend mode:", err.message);
+                    }
+                }
+
+                if (!localSuccess) {
+                    await fetchTelemetryFromCloud();
+                }
+
+                if (autoRefreshCheck.checked && !autoRefreshIntervalId) {
+                    startAutoRefresh();
+                }
+            }
+
+            async function fetchTelemetryFromCloud() {
+                try {
+                    const res = await fetch(getApiBase() + '/api/telemetry');
+                    if (!res.ok) throw new Error("Cloud telemetry fetch failed");
+                    const data = await res.json();
+                    
+                    if (data.connected) {
+                        roverStatusBadge.className = 'status-indicator-badge status-badge-connected';
+                        roverStatusBadge.textContent = '🟢 ESP32 connected';
+                        telemetryModeText.textContent = 'Cloud Backend Sync';
+                        applyTelemetryData(data);
+                    } else if (data.stale) {
+                        roverStatusBadge.className = 'status-indicator-badge status-badge-connecting';
+                        roverStatusBadge.textContent = '⚠ Telemetry stale';
+                        telemetryModeText.textContent = 'Cloud (Stale Data)';
+                        telemetryFreshnessText.textContent = 'ESP32 connection lost';
+                        applyTelemetryData(data);
+                    } else {
+                        roverStatusBadge.className = 'status-indicator-badge status-badge-disconnected';
+                        roverStatusBadge.textContent = '🔴 ESP32 not connected';
+                        telemetryModeText.textContent = 'Cloud (No Data)';
+                        telemetryFreshnessText.textContent = 'No telemetry received';
+                    }
+                } catch (err) {
+                    roverStatusBadge.className = 'status-indicator-badge status-badge-disconnected';
+                    roverStatusBadge.textContent = '🔴 ESP32 not connected';
+                    telemetryFreshnessText.textContent = 'Telemetry unreachable';
+                }
+            }
+
+            function applyTelemetryData(data) {
+                if (data.soil_moisture !== undefined && data.soil_moisture !== null) {
+                    soilMoistureInput.value = data.soil_moisture;
+                }
+                if (data.temperature !== undefined && data.temperature !== null) {
+                    temperatureInput.value = data.temperature;
+                }
+                if (data.humidity !== undefined && data.humidity !== null) {
+                    humidityInput.value = data.humidity;
+                }
+                const phVal = data.soil_ph !== undefined && data.soil_ph !== null ? data.soil_ph : data.ph;
+                if (phVal !== undefined && phVal !== null) {
+                    soilPhInput.value = phVal;
+                }
+
+                lastTelemetryTimestamp = Date.now();
+                updateFreshnessLabel(data);
+            }
+
+            function updateFreshnessLabel(data) {
+                if (data && data.age_seconds !== undefined && data.age_seconds !== null) {
+                    if (data.stale) {
+                        telemetryFreshnessText.textContent = 'ESP32 connection lost';
+                        telemetryFreshnessText.style.color = 'var(--status-danger-text)';
+                    } else {
+                        telemetryFreshnessText.textContent = `Last update: ${data.age_seconds}s ago`;
+                        telemetryFreshnessText.style.color = 'var(--status-success-text)';
+                    }
+                } else if (lastTelemetryTimestamp) {
+                    const elapsedSec = Math.floor((Date.now() - lastTelemetryTimestamp) / 1000);
+                    telemetryFreshnessText.textContent = `Last update: ${elapsedSec}s ago`;
+                    telemetryFreshnessText.style.color = 'var(--text-heading)';
+                }
+            }
+
+            function startAutoRefresh() {
+                stopAutoRefresh();
+                autoRefreshIntervalId = setInterval(async () => {
+                    await connectEsp32Rover();
+                }, 5000);
+            }
+
+            function stopAutoRefresh() {
+                if (autoRefreshIntervalId) {
+                    clearInterval(autoRefreshIntervalId);
+                    autoRefreshIntervalId = null;
+                }
+            }
+
+
+            // =========================================================================
+            // SMS ALERT SYSTEM CONTROLLER
+            // =========================================================================
+            const smsPhoneInput = document.getElementById('smsPhoneInput');
+            const smsCooldownInput = document.getElementById('smsCooldownInput');
+            const smsLowMoistureCheck = document.getElementById('smsLowMoistureCheck');
+            const smsHighTempCheck = document.getElementById('smsHighTempCheck');
+            const smsAbnormalHumidityCheck = document.getElementById('smsAbnormalHumidityCheck');
+            const smsAbnormalPhCheck = document.getElementById('smsAbnormalPhCheck');
+            const smsConfigBadge = document.getElementById('smsConfigBadge');
+            const saveSmsBtn = document.getElementById('saveSmsBtn');
+            const testSmsBtn = document.getElementById('testSmsBtn');
+            const smsStatusBox = document.getElementById('smsStatusBox');
+
+            loadSmsSettings();
+
+            async function loadSmsSettings() {
+                try {
+                    const res = await fetch(getApiBase() + '/api/sms/settings');
+                    if (!res.ok) return;
+                    const data = await res.json();
+                    
+                    if (data.configured) {
+                        smsConfigBadge.className = 'status-indicator-badge status-badge-connected';
+                        smsConfigBadge.textContent = '🟢 SMS Configured';
+                    } else {
+                        smsConfigBadge.className = 'status-indicator-badge status-badge-disconnected';
+                        smsConfigBadge.textContent = '🔴 SMS Not Configured';
+                    }
+
+                    if (data.settings) {
+                        const s = data.settings;
+                        if (s.phone_number) smsPhoneInput.value = s.phone_number;
+                        if (s.cooldown_minutes) smsCooldownInput.value = s.cooldown_minutes;
+                        smsLowMoistureCheck.checked = !!s.low_soil_moisture;
+                        smsHighTempCheck.checked = !!s.high_temperature;
+                        smsAbnormalHumidityCheck.checked = !!s.abnormal_humidity;
+                        smsAbnormalPhCheck.checked = !!s.abnormal_soil_ph;
+                    }
+                } catch (err) {
+                    console.warn("Failed to load SMS settings:", err.message);
+                }
+            }
+
+            saveSmsBtn.addEventListener('click', async () => {
+                smsStatusBox.classList.remove('hidden');
+                smsStatusBox.innerHTML = '<span style="color:#2563eb;">💾 Saving SMS settings...</span>';
+
+                const payload = {
+                    phone_number: smsPhoneInput.value.trim(),
+                    cooldown_minutes: parseInt(smsCooldownInput.value) || 5,
+                    low_soil_moisture: smsLowMoistureCheck.checked,
+                    high_temperature: smsHighTempCheck.checked,
+                    abnormal_humidity: smsAbnormalHumidityCheck.checked,
+                    abnormal_soil_ph: smsAbnormalPhCheck.checked
+                };
+
+                try {
+                    const res = await fetch(getApiBase() + '/api/sms/settings', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    const data = await res.json();
+
+                    if (res.ok && data.status === 'success') {
+                        smsStatusBox.className = 'sms-status-box';
+                        smsStatusBox.style.backgroundColor = 'var(--status-success-bg)';
+                        smsStatusBox.style.color = 'var(--status-success-text)';
+                        smsStatusBox.innerHTML = '✅ SMS alerts configured successfully!';
+                        loadSmsSettings();
+                    } else {
+                        smsStatusBox.className = 'sms-status-box';
+                        smsStatusBox.style.backgroundColor = 'var(--status-danger-bg)';
+                        smsStatusBox.style.color = 'var(--status-danger-text)';
+                        smsStatusBox.innerHTML = `❌ ${data.message || 'Failed to save settings'}`;
+                    }
+                } catch (err) {
+                    smsStatusBox.className = 'sms-status-box';
+                    smsStatusBox.style.backgroundColor = 'var(--status-danger-bg)';
+                    smsStatusBox.style.color = 'var(--status-danger-text)';
+                    smsStatusBox.innerHTML = `❌ Connection error: ${err.message}`;
+                }
+            });
+
+            testSmsBtn.addEventListener('click', async () => {
+                smsStatusBox.classList.remove('hidden');
+                smsStatusBox.innerHTML = '<span style="color:#2563eb;">💬 Dispatching test SMS via Twilio...</span>';
+
+                try {
+                    const res = await fetch(getApiBase() + '/api/sms/test', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ phone_number: smsPhoneInput.value.trim() })
+                    });
+                    const data = await res.json();
+
+                    if (res.ok && data.success) {
+                        smsStatusBox.className = 'sms-status-box';
+                        smsStatusBox.style.backgroundColor = 'var(--status-success-bg)';
+                        smsStatusBox.style.color = 'var(--status-success-text)';
+                        smsStatusBox.innerHTML = `✅ ${data.message || 'SMS sent successfully'}`;
+                    } else {
+                        smsStatusBox.className = 'sms-status-box';
+                        smsStatusBox.style.backgroundColor = 'var(--status-danger-bg)';
+                        smsStatusBox.style.color = 'var(--status-danger-text)';
+                        smsStatusBox.innerHTML = `❌ ${data.message || 'SMS failed: Twilio credentials not configured.'}`;
+                    }
+                } catch (err) {
+                    smsStatusBox.className = 'sms-status-box';
+                    smsStatusBox.style.backgroundColor = 'var(--status-danger-bg)';
+                    smsStatusBox.style.color = 'var(--status-danger-text)';
+                    smsStatusBox.innerHTML = `❌ Test SMS failed: ${err.message}`;
+                }
+            });
 
             analyzeBtn.addEventListener('click', startAnalysis);
 
