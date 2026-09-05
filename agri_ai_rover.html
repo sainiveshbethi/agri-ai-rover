@@ -1203,7 +1203,7 @@
                     <span>📱 SMS ALERT SYSTEM</span>
                     <span id="smsConfigBadge" class="status-indicator-badge status-badge-disconnected">SMS Not Configured</span>
                 </div>
-                <p class="card-desc">Server-side Twilio mobile alerts triggered by field sensor anomalies with server-enforced cooldowns.</p>
+                <p class="card-desc">Server-side Fast2SMS mobile alerts triggered by field sensor anomalies with server-enforced cooldowns.</p>
 
                 <div class="settings-field">
                     <label for="smsPhoneInput">Farmer Mobile Number (E.164 Format)</label>
@@ -2055,7 +2055,7 @@
 
             testSmsBtn.addEventListener('click', async () => {
                 smsStatusBox.classList.remove('hidden');
-                smsStatusBox.innerHTML = '<span style="color:#2563eb;">💬 Dispatching test SMS via Twilio...</span>';
+                smsStatusBox.innerHTML = '<span style="color:#2563eb;">💬 Dispatching test SMS via Fast2SMS...</span>';
 
                 try {
                     const res = await fetch(getApiBase() + '/api/sms/test', {
@@ -2074,7 +2074,7 @@
                         smsStatusBox.className = 'sms-status-box';
                         smsStatusBox.style.backgroundColor = 'var(--status-danger-bg)';
                         smsStatusBox.style.color = 'var(--status-danger-text)';
-                        smsStatusBox.innerHTML = `❌ ${data.message || 'SMS failed: Twilio credentials not configured.'}`;
+                        smsStatusBox.innerHTML = `❌ ${data.message || 'SMS failed: Fast2SMS API key not configured.'}`;
                     }
                 } catch (err) {
                     smsStatusBox.className = 'sms-status-box';
