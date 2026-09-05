@@ -1501,36 +1501,36 @@
             });
 
             async function checkApiConnection(verbose = false) {
-                const apiBase = getApiBase();
-                try {
-                    const res = await fetch(apiBase + '/api/test-gemini');
-                    const data = await res.json();
-                    if (res.ok && data.status === 'connected') {
-                        setBadgeState('connected', 'Gemini Vision Connected');
-                        diagConn.textContent = 'Connected (.env Key)';
-                        diagConn.style.color = '#15803d';
-                        diagKeyStatus.textContent = 'Configured (.env)';
-                        diagModel.textContent = data.model || 'gemini-3.5-flash-lite';
-                        if (verbose) testOutputBox.innerHTML = `<span style="color:#15803d;">✅ ${data.message} (${apiBase || 'Local Server'})</span>`;
-                    } else {
-                        setBadgeState('error', 'Gemini API Error');
-                        diagConn.textContent = data.message || 'API Test Failed';
-                        diagConn.style.color = '#b91c1c';
-                        diagKeyStatus.textContent = data.configured ? 'Configured (.env)' : 'Not Configured';
-                        diagModel.textContent = data.model || 'Unknown';
-                        if (verbose) testOutputBox.innerHTML = `<span style="color:#b91c1c;">❌ ${data.message}</span>`;
-                    }
-                } catch (err) {
-                    setBadgeState('error', 'Gemini API Error');
-                    diagConn.textContent = 'Server Offline / Error';
-                    diagConn.style.color = '#b91c1c';
-                    diagKeyStatus.textContent = 'Unknown';
-                    const targetHost = apiBase || 'http://127.0.0.1:5000';
-                    if (verbose) testOutputBox.innerHTML = `<span style="color:#b91c1c;">❌ Cannot connect to AgriAI server at ${targetHost}. Please enter your deployed backend URL in Settings or start local backend (py app.py).</span>`;
-                }
-            }
+    const apiBase = getApiBase();
+    try {
+        const res = await fetch(apiBase + '/api/test-gemini');
+        const data = await res.json();
+        if (res.ok && data.status === 'connected') {
+            setBadgeState('connected', 'Gemini Vision Connected');
+            diagConn.textContent = 'Connected (Server Environment)';
+            diagConn.style.color = '#15803d';
+            diagKeyStatus.textContent = 'Configured (Server Environment)';
+            diagModel.textContent = data.model || 'gemini-3.8-flash';
+            if (verbose) testOutputBox.innerHTML = `<span style="color:#15803d;">✅ ${data.message} (Model: ${data.model})</span>`;
+        } else {
+            setBadgeState('error', 'Gemini API Error');
+            diagConn.textContent = data.message || 'API Test Failed';
+            diagConn.style.color = '#b91c1c';
+            diagKeyStatus.textContent = data.configured ? 'Configured (Server Environment)' : 'Not Configured';
+            diagModel.textContent = data.model || 'gemini-3.8-flash';
+            if (verbose) testOutputBox.innerHTML = `<span style="color:#b91c1c;">❌ ${data.message}</span>`;
+        }
+    } catch (err) {
+        setBadgeState('error', 'Gemini API Error');
+        diagConn.textContent = 'Connection Error';
+        diagConn.style.color = '#b91c1c';
+        diagKeyStatus.textContent = 'Not Connected';
+        diagModel.textContent = 'gemini-3.8-flash';
+        if (verbose) testOutputBox.innerHTML = `<span style="color:#b91c1c;">❌ Connection error: ${err.message}</span>`;
+    }
+}
 
-            function setBadgeState(state, textStr) {
+function setBadgeState(state, textStr) {
                 badgeModeText.textContent = textStr;
                 badgeDot.className = 'status-dot';
                 if (state === 'connected') {
