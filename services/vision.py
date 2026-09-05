@@ -111,37 +111,36 @@ class VisionAIService:
                 "message": "Gemini API key is not configured in environment variables."
             }
 
-        try:
-            client = genai.Client(api_key=self.api_key)
-            
-            # Minimal text request without image or function calling overhead
-            response = client.models.generate_content(
-                model="gemini-3.8-flash",
-                contents="Reply with OK only."
-            )
+        last_exception = None
+        client = genai.Client(api_key=self.api_key)
+        for model_name in self.models:
+            try:
+                response = client.models.generate_content(
+                    model=model_name,
+                    contents="Reply with OK only."
+                )
+                if response and response.text:
+                    return {
+                        "status": "connected",
+                        "configured": True,
+                        "engine": "Gemini Vision AI",
+                        "model": model_name,
+                        "message": f"Gemini Vision API is connected and responding normally! (Model: {model_name})"
+                    }
+            except Exception as e:
+                last_exception = e
+                continue
 
-            if response and response.text:
-                return {
-                    "status": "connected",
-                    "configured": True,
-                    "engine": "Gemini Vision AI",
-                    "model": "gemini-3.8-flash",
-                    "message": "Gemini Vision API is connected and responding normally!"
-                }
-            else:
-                raise RuntimeError("Empty response received from Gemini API test.")
-
-        except Exception as e:
-            err_msg = str(e)
-            if self.api_key and self.api_key in err_msg:
-                err_msg = err_msg.replace(self.api_key, "[REDACTED_API_KEY]")
-            return {
-                "status": "error",
-                "configured": True,
-                "engine": "Gemini Vision AI",
-                "model": "Unknown",
-                "message": f"Gemini API test failed: {err_msg}"
-            }
+        err_msg = str(last_exception) if last_exception else "Gemini API test failed"
+        if self.api_key and self.api_key in err_msg:
+            err_msg = err_msg.replace(self.api_key, "[REDACTED_API_KEY]")
+        return {
+            "status": "error",
+            "configured": True,
+            "engine": "Gemini Vision AI",
+            "model": "Unknown",
+            "message": f"Gemini API test failed: {err_msg}"
+        }
 
     def analyze_crop_image(self, pil_image: Image.Image) -> Dict[str, Any]:
         """Compresses image and sends concise Gemini Vision request using google-genai SDK."""
