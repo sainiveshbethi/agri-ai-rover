@@ -39,8 +39,8 @@ def add_cors_headers(response):
 
 @app.route('/')
 def index():
-    """Renders main user interface using single-file agri_ai_rover.html."""
-    return send_file(os.path.join(os.path.dirname(__file__), 'agri_ai_rover.html'))
+    """Renders main user interface using templates/index.html."""
+    return render_template('index.html')
 
 @app.route('/api/test-gemini', methods=['GET', 'OPTIONS'])
 def test_gemini():
